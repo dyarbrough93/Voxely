@@ -26,7 +26,6 @@
     <script src="/js/classes/Keys.js"></script>
     <script src="/js/classes/MapControls.js"></script>
     <script src="/js/classes/User.js"></script>
-    <script src="/js/classes/PixVoxConversion.js"></script>
     <script src="/js/classes/BufMeshMgr.js"></script>
     <script src="/js/classes/VoxelActions.js"></script>
     <script src="/js/classes/GUI.js"></script>
@@ -39,7 +38,6 @@
     <style>
         #info {
             position: absolute;
-            left: 100px;
         }
         .btn-info {
             margin: 0 3px 0 3px;

@@ -33,7 +33,6 @@ let VoxelActions = function(window, undefined) {
         WorldData.addMesh(sid, coordStr, voxelMesh, username)
 
         Raycast.add(voxelMesh)
-        PixVoxConversion.addToConvertedVoxels(sid, coordStr)
 
         WorldData.addToUserData(username, gPos)
 
@@ -134,32 +133,6 @@ let VoxelActions = function(window, undefined) {
 
     }
 
-    /**
-     * Deletes a pixel at the specified grid position
-     * @memberOf VoxelActions
-     * @access public
-     * @param  {VoxelUtils.GridVector3} gPos The grid position
-     */
-    function deletePixelAtGridPos(gPos) {
-
-        let vox = WorldData.getVoxel(gPos)
-
-        // part of expansion
-        if (vox.exp) GameScene.getPSystemExpo().hidePixel(vox.pIdx)
-        // part of original
-        else {
-            let sid = VoxelUtils.getSectionIndices(gPos)
-            GameScene.getPSystem().hidePixel(sid, vox.pIdx)
-        }
-
-        let username = vox.isMesh ? vox.userData.username : vox.username
-        WorldData.removeFromUserData(username, gPos)
-        WorldData.removeVoxel(gPos)
-
-        GameScene.render()
-
-    }
-
     /*------------------------------------*
      :: Private Methods
      *------------------------------------*/
@@ -184,11 +157,6 @@ let VoxelActions = function(window, undefined) {
         WorldData.removeVoxel(gPos)
 
         Raycast.remove(vox)
-        PixVoxConversion.removeFromConvertedVoxels(coordStr)
-
-        if (vox.exp) {
-            GameScene.getPSystemExpo().deletePixel(vox.pIdx)
-        }
 
         GameScene.render()
 
@@ -207,15 +175,10 @@ let VoxelActions = function(window, undefined) {
         let coordStr = VoxelUtils.getCoordStr(gPos)
 
         BufMeshMgr.removeVoxel(vox.bIdx)
-        PixVoxConversion.removeFromConvertedVoxels(coordStr)
 
         let username = vox.isMesh ? vox.userData.username : vox.username
         WorldData.removeFromUserData(username, gPos)
         WorldData.removeVoxel(gPos)
-
-        if (vox.exp) {
-            GameScene.getPSystemExpo().hidePixel(vox.pIdx)
-        }
 
         GameScene.render()
 
@@ -228,8 +191,7 @@ let VoxelActions = function(window, undefined) {
         createVoxelAtGridPos: createVoxelAtGridPos,
         createVoxelAtIntersect: createVoxelAtIntersect,
         deleteVoxelAtIntersect: deleteVoxelAtIntersect,
-        deleteVoxelAtGridPos: deleteVoxelAtGridPos,
-        deletePixelAtGridPos: deletePixelAtGridPos
+        deleteVoxelAtGridPos: deleteVoxelAtGridPos
 
     }
 

@@ -200,24 +200,6 @@ let VoxelUtils = (function(window, undefined) {
     }
 
     /**
-     * Checks to see if a coordinate is within the bounds of the
-     * currently selected region.
-     * @memberOf VoxelWorld
-     * @param {VoxelUtils.GridVector3} gPos Grid position to check
-     * @returns {boolean}
-     */
-    function withinSelectionBounds(gPos) {
-
-        let selectedRegion = User.getSelectedRegion()
-
-        return (gPos.x >= selectedRegion.corner1.x &&
-            gPos.z >= selectedRegion.corner1.z &&
-            gPos.x <= selectedRegion.corner2.x &&
-            gPos.z <= selectedRegion.corner2.z)
-
-    }
-
-    /**
      * Check if the given position is within
      * the global height limit
      * @param  {VoxelUtils.GridVector3} gPos The position
@@ -251,8 +233,7 @@ let VoxelUtils = (function(window, undefined) {
      * @return {boolean}
      */
     function validBlockLocation(gPos) {
-        return withinSelectionBounds(gPos) &&
-            validHeight(gPos)
+        return validHeight(gPos) && withinGridBoundaries(gPos)
     }
 
     function withinGridBoundaries(gPos) {
@@ -466,7 +447,6 @@ let VoxelUtils = (function(window, undefined) {
 
     return {
         withinGridBoundaries: withinGridBoundaries,
-        withinSelectionBounds: withinSelectionBounds,
         validBlockLocation: validBlockLocation,
         coordStrParse: coordStrParse,
         getCoordStr: getCoordStr,

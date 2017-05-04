@@ -24,7 +24,6 @@ var Main = function() {
         Keys.init()
         User.init()
         MapControls.init()
-        PixVoxConversion.init()
         BufMeshMgr.init()
         SocketHandler.init()
 

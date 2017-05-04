@@ -75,22 +75,18 @@ let AdminGUI = function(window, undefined) {
                 fixed: false
             })
             .addButton(settings.deleteRegion.offText, function() {
-                Mouse.preventRegionSelect()
                 toggleAdminControl('deleteRegion', true)
                 deletingRegion = true
             })
             .addButton(settings.deleteRegionWColor.offText, function() {
-                Mouse.preventRegionSelect()
                 toggleAdminControl('deleteRegionWColor', true)
                 deletingRegionWithColor = true
             })
             .addButton(settings.cleanRegion.offText, function() {
-                Mouse.preventRegionSelect()
                 toggleAdminControl('cleanRegion', true)
                 cleaningRegion = true
             })
             .addButton(settings.deleteRegionWUName.offText, function() {
-                Mouse.preventRegionSelect()
                 toggleAdminControl('deleteRegionWUName', true)
                 deletingRegionWithUName = true
             })

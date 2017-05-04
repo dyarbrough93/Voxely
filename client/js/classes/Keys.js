@@ -185,17 +185,6 @@ let Keys = function(window, undefined) {
             User.setDefaultState()
         }
 
-        else if (User.modeIsEdit()) {
-
-            User.setSelectMode()
-            User.resetSelectedRegion()
-            PixVoxConversion.convertToPixels()
-            GameScene.setGhostMeshVis(false)
-            Mouse.forceTriggerMouseMove()
-            GameScene.render()
-
-        }
-
     }
 
     /**

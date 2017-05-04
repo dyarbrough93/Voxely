@@ -2,12 +2,8 @@ const _ = require('lodash')
 
 const sharedConfig = {
     maxVoxelHeight: 75,
-    actionDelay: 225, // ms
-    guestActionDelay: 2500, // ms
-    deleteOtherDelay: 2500, // ms
-    guestDeleteOtherDelay: 5500, // ms
-    chatDelay: 3, // s
-    maxGlobalBlocks: 1000000,
+    actionDelay: 100, // ms
+    maxGlobalBlocks: 5000
 }
 
 const serverConfig = {
@@ -38,8 +34,8 @@ const clientConfig = {
     grid: {
         blockSize: 50, // even
         sqPerSideOfSelectPlane: 41, // must be odd
-        sqPerSideOfSection: 151, // must be odd
-        sectionsPerSide: 17,
+        sqPerSideOfSection: 51, // must be odd
+        sectionsPerSide: 3,
         init: function() {
             // must be odd
             this.sqPerSideOfGrid = this.sqPerSideOfSection *

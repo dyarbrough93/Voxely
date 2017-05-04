@@ -31,7 +31,6 @@ let GameScene = function(window, undefined) {
     // planes
     let voxelPlane
     let mapControlsPlane
-    let regionSelectPlane
     let rspColors
 
     // meshes
@@ -66,7 +65,7 @@ let GameScene = function(window, undefined) {
                 fov: 45,
                 near: 100,
                 far: 300000,
-                distMult: 0.75
+                distMult: 0.4
             }
 
             let aspect = window.innerWidth / window.innerHeight
@@ -194,12 +193,6 @@ let GameScene = function(window, undefined) {
 
             })()
 
-            // this is the transparent plane used to
-            // select a region for editing
-            let bs = Config.getGrid().blockSize
-            let sssp = Config.getGrid().sqPerSideOfSelectPlane
-            setupRegionSelectPlane(bs * sssp)
-
         })()
 
         ;
@@ -262,31 +255,6 @@ let GameScene = function(window, undefined) {
 
     }
 
-    function setupRegionSelectPlane(size) {
-
-        rspColors = {
-            off: '#7900ab',
-            on: '#c1ffea'
-        }
-
-        scene.remove(regionSelectPlane)
-
-        let selGeom = new THREE.PlaneGeometry(size, size)
-        selGeom.rotateX(-Math.PI / 2)
-        selGeom.translate(0, -25, 0)
-
-        let selMat = new THREE.MeshBasicMaterial({
-            color: rspColors.off,
-            transparent: true,
-            opacity: 0.10
-        })
-
-        regionSelectPlane = new THREE.Mesh(selGeom, selMat)
-
-        scene.add(regionSelectPlane)
-
-    }
-
     /**
      * Renders the scene
      * @memberOf GameScene
@@ -296,41 +264,6 @@ let GameScene = function(window, undefined) {
 
         renderer.render(scene, camera)
 
-    }
-
-    /**
-     * Moves the region select plane based on
-     * the given intersect
-     * @memberOf GameScene
-     * @access public
-     * @param  {THREE.Intersect} planeIntx Intersection with the voxelPlane
-     */
-    function moveRegionSelectPlane(planeIntx) {
-
-        regionSelectPlane.position.copy(planeIntx.point).add(planeIntx.face.normal).initWorldPos()
-        regionSelectPlane.position.snapToGrid()
-
-        render()
-
-    }
-
-    /**
-     * Turn the region select plane visibility on or off
-     * @memberOf GameScene
-     * @access public
-     * @param {boolean} visible set visiblity
-     */
-    function setRegionSelectPlaneVis(visible) {
-
-        if (!visible) {
-            regionSelectPlane.material.opacity = 0.085
-            regionSelectPlane.material.color.set(rspColors.on)
-        } else {
-            regionSelectPlane.material.opacity = 0.10
-            regionSelectPlane.material.color.set(rspColors.off)
-        }
-
-        render()
     }
 
     /**
@@ -361,6 +294,7 @@ let GameScene = function(window, undefined) {
      */
     function setGhostMeshColor(hColor) {
         ghostMesh.material.color.setHex(hColor)
+        render()
     }
 
     /**
@@ -606,11 +540,9 @@ let GameScene = function(window, undefined) {
         highlightUserVoxels: highlightUserVoxels,
         setDeleteMeshVis: setDeleteMeshVis,
         setGhostMeshVis: setGhostMeshVis,
-        setRegionSelectPlaneVis: setRegionSelectPlaneVis,
         setGhostMeshColor: setGhostMeshColor,
         updateGhostMesh: updateGhostMesh,
         updateDeleteMesh: updateDeleteMesh,
-        moveRegionSelectPlane: moveRegionSelectPlane,
         getMapControlsPlane: getMapControlsPlane,
         removeOutlines: removeOutlines,
         getScene: getScene,
@@ -618,7 +550,6 @@ let GameScene = function(window, undefined) {
         getPSystem: getPSystem,
         getPSystemExpo: getPSystemExpo,
         setDirLightPos: setDirLightPos,
-        setupRegionSelectPlane: setupRegionSelectPlane,
         render: render
 
     }

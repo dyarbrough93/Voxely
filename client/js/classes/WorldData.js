@@ -7,301 +7,324 @@
  */
 let WorldData = function(window, undefined) {
 
-    /**
-     * An object containing information on voxel
-     * ownership, with keys being usernames and values
-     * being Objects containing the owned voxels in a
-     * coordinate tree (for fast indexing), with the following format:
-     *<pre><code>
-     * {
-     *     'username': {
-     *         1 : {
-     *             5 : {
-     *                 3 {}
-     *             },
-     *             4 : {
-     *                 2 : {}
-     *             }
-     *         },
-     *         6 : {
-     *             2 : {
-     *                 1 : {}
-     *             }
-     *         }
-     *     }
-     * }
-     *</code></pre>
-     * with the first level as the x coordinate, the second level as
-     * the y coordinate, and the third level as the z coordinate. So,
-     * in the above example, "username" owns voxels {1, 5, 3}, {1, 4, 2}, and {6, 2, 1}
-     * @memberOf WorldData
-     * @typedef {Object} userData
-     */
+	/**
+	 * An object containing information on voxel
+	 * ownership, with keys being usernames and values
+	 * being Objects containing the owned voxels in a
+	 * coordinate tree (for fast indexing), with the following format:
+	 *<pre><code>
+	 * {
+	 *     'username': {
+	 *         1 : {
+	 *             5 : {
+	 *                 3 {}
+	 *             },
+	 *             4 : {
+	 *                 2 : {}
+	 *             }
+	 *         },
+	 *         6 : {
+	 *             2 : {
+	 *                 1 : {}
+	 *             }
+	 *         }
+	 *     }
+	 * }
+	 *</code></pre>
+	 * with the first level as the x coordinate, the second level as
+	 * the y coordinate, and the third level as the z coordinate. So,
+	 * in the above example, "username" owns voxels {1, 5, 3}, {1, 4, 2}, and {6, 2, 1}
+	 * @memberOf WorldData
+	 * @typedef {Object} userData
+	 */
 
-    /**
-     * An object containing information on all of the
-     * voxels currently in the world, where keys are
-     * {@link VoxelUtils.coordStr} and values can be either
-     * a THREE.Mesh (a newly placed voxel) or a {@link WorldData.VoxelInfo}
-     * The structure looks like this:
-     *<pre><code>
-     * {
-     *     'x12y10z-5': {@link WorldData.VoxelInfo}
-     *     'x-5y4z3': {@link WorldData.VoxelInfo}
-     *     'x7y1z8': {THREE.Mesh}
-     * }
-     *</code></pre>
-     * @memberOf WorldData
-     * @typedef {Object} worldData
-     */
+	/**
+	 * An object containing information on all of the
+	 * voxels currently in the world, where keys are
+	 * {@link VoxelUtils.coordStr} and values can be either
+	 * a THREE.Mesh (a newly placed voxel) or a {@link WorldData.VoxelInfo}
+	 * The structure looks like this:
+	 *<pre><code>
+	 * {
+	 *     'x12y10z-5': {@link WorldData.VoxelInfo}
+	 *     'x-5y4z3': {@link WorldData.VoxelInfo}
+	 *     'x7y1z8': {THREE.Mesh}
+	 * }
+	 *</code></pre>
+	 * @memberOf WorldData
+	 * @typedef {Object} worldData
+	 */
 
-    /*------------------------------------*
-     :: Classes
-     *------------------------------------*/
+	/*------------------------------------*
+	 :: Classes
+	 *------------------------------------*/
 
-    /**
-     * @class VoxelInfo
-     * @param {number} hColor Hex color
-     * @param {string} username Username of the user that owns this voxel
-     * @param {number} pIdx Index in the particle system geometry
-     * @param {number} bIdx Buffer index. used with BufMeshMgr
-     * @param {boolean} exp Part of particle system expansion?
-     * @memberOf WorldData
-     */
-    function VoxelInfo(hColor, username, pIdx, bIdx, exp) {
+	/**
+	 * @class VoxelInfo
+	 * @param {number} hColor Hex color
+	 * @param {number} bIdx Buffer index. used with BufMeshMgr
+	 * @memberOf WorldData
+	 */
+	function VoxelInfo(hColor, bIdx) {
 
-        this.hColor = hColor
-        this.username = username
-        this.pIdx = pIdx
-        this.bIdx = bIdx
-        this.exp = exp
+		this.hColor = hColor
+		this.bIdx = bIdx
 
-    }
+	}
 
-    /*------------------------------------*
-     :: Class Variables
-     *------------------------------------*/
+	/*------------------------------------*
+	 :: Class Variables
+	 *------------------------------------*/
 
-    let worldData
-    let userData
+	let worldData
+	let userData
 
-    /*------------------------------------*
-     :: Public Methods
-     *------------------------------------*/
+	/*------------------------------------*
+	 :: Public Methods
+	 *------------------------------------*/
 
-    /**
-     * Initializes the module. Must be called
-     * before anything else
-     * @memberOf WorldData
-     * @access public
-     */
-    function init() {
+	/**
+	 * Initializes the module. Must be called
+	 * before anything else
+	 * @memberOf WorldData
+	 * @access public
+	 */
+	function init() {
 
-        let secPerSide = Config.getGrid().sectionsPerSide
+		let secPerSide = Config.getGrid().sectionsPerSide
 
-        worldData = []
-        userData = {}
-        for (let i = 0, len1 = secPerSide; i < len1; i++) {
-            worldData[i] = []
-            for (let j = 0, len2 = secPerSide; j < len2; j++) {
-                worldData[i][j] = {}
-            }
-        }
+		worldData = []
+		userData = {}
+		for (let i = 0, len1 = secPerSide; i < len1; i++) {
+			worldData[i] = []
+			for (let j = 0, len2 = secPerSide; j < len2; j++) {
+				worldData[i][j] = {}
+			}
+		}
 
-    }
+	}
 
-    /**
-     * Load all of the world data into the scene
-     * @memberOf WorldData
-     * @access public
-     * @param {object} data Contains all of the data
-     * to load in, retrieved viq the SocketHandler
-     */
-    function loadIntoScene(data) {
+	/**
+	 * Load all of the world data into the scene
+	 * @memberOf WorldData
+	 * @access public
+	 * @param {object} data Contains all of the data
+	 * to load in, retrieved viq the SocketHandler
+	 */
+	function loadIntoScene(data) {
 
-        let particleSystem = GameScene.getPSystem()
+		console.log('loading pixels into scene ...')
 
-        console.log('loading pixels into scene ...')
+		let numCubes = countVoxels(data)
+		initVoxels(numCubes, data)
 
-        for (let coordStr in data) {
-            if (data.hasOwnProperty(coordStr)) {
+		console.log('done loading voxels')
 
-                let hColor = data[coordStr].c
-                let tColor = new THREE.Color(hColor)
-                let username = data[coordStr].username
+		GameScene.render()
 
-                let gPos = VoxelUtils.coordStrParse(coordStr)
+	}
 
-                if (username && username !== 'Guest')
-                    addToUserData(username, gPos)
+	function countVoxels(data) {
 
-                if (VoxelUtils.withinGridBoundaries(gPos)) {
+		let numCubes = 0
 
-                    let wPos = gPos.clone().gridToWorld()
+		for (let coordStr in data) {
+			if (data.hasOwnProperty(coordStr)) {
+				numCubes++
+			}
+		}
 
-                    let sid = VoxelUtils.getSectionIndices(gPos)
+		return numCubes
 
-                    // add a pixel to the particle system,
-                    // then add a voxel to worldData
-                    let pIdx = particleSystem.addPixel(sid, wPos, tColor)
+	}
 
-                    // add to worldData
-                    let voxInfo = new VoxelInfo(hColor, username, pIdx, null, false)
-                    addVoxel(sid, coordStr, voxInfo)
+	function initVoxels(numCubes, data) {
 
-                }
+		BufMeshMgr.createBufMesh(numCubes, GameScene.getScene())
 
-            }
-        }
+		let gPos
+		let wPos
+		let sid
+		let currVox
 
-        particleSystem.addToScene()
+		let i = 0
+		let bufVertsLen = BufMeshMgr.getBufVertsLen()
 
-        console.log('done loading pixels')
+		for (let voxPos in data) {
 
-        GameScene.render()
+			gPos = VoxelUtils.coordStrParse(voxPos).initGridPos()
+			wPos = gPos.clone().gridToWorld()
+			sid = VoxelUtils.getSectionIndices(gPos)
+			currVox = data[voxPos]
 
-    }
+			if (VoxelUtils.validBlockLocation(gPos)) {
 
-    /**
-     * Creates a VoxelInfo entry in the worldData object with the specified
-     * parameters.
-     * @memberOf WorldData
-     * @access public
-     * @param {VoxelUtils.Tuple} sid Section indices
-     * @param {VoxelUtils.coordStr} coordStr Coordinate string (grid coords)
-     * @param {WorldData.VoxelInfo} voxInfo Object containing the voxel information
-     */
-    function addVoxel(sid, coordStr, voxInfo) {
+				let hColor = currVox.c
+				let tColor = new THREE.Color(hColor)
+
+				/*// vvv black magic, don't touch
+				if (i === 0) console.log(wPos)
+				// ^^^ somehow fixes raycast lag*/
+
+				BufMeshMgr.addVoxel(i, wPos, tColor)
+				currVox.bIdx = i
+
+				let voxInfo = new VoxelInfo(hColor, i)
+				addVoxel(sid, voxPos, voxInfo)
+
+			}
+
+			i += bufVertsLen
+
+		}
+
+		let bufMesh = BufMeshMgr.getBufMesh()
+
+		Raycast.add(bufMesh)
+		GameScene.addToScene(bufMesh)
+
+	}
+
+	/**
+	 * Creates a VoxelInfo entry in the worldData object with the specified
+	 * parameters.
+	 * @memberOf WorldData
+	 * @access public
+	 * @param {VoxelUtils.Tuple} sid Section indices
+	 * @param {VoxelUtils.coordStr} coordStr Coordinate string (grid coords)
+	 * @param {WorldData.VoxelInfo} voxInfo Object containing the voxel information
+	 */
+	function addVoxel(sid, coordStr, voxInfo) {
 
         worldData[sid.a][sid.b][coordStr] = voxInfo
-    }
+	}
 
-    /**
-     * Add a mesh to the world data
-     * @memberOf WorldData
-     * @access public
-     * @param {VoxelUtils.Tuple} sid Section indices of the voxel we are adding
-     * @param {VoxelUtils.coordStr} coordStr coordinate string of the voxel
-     * @param {THREE.Mesh} mesh The mesh to add
-     */
-    function addMesh(sid, coordStr, mesh, uname) {
-        mesh.userData.username = uname
-        worldData[sid.a][sid.b][coordStr] = mesh
-    }
+	/**
+	 * Add a mesh to the world data
+	 * @memberOf WorldData
+	 * @access public
+	 * @param {VoxelUtils.Tuple} sid Section indices of the voxel we are adding
+	 * @param {VoxelUtils.coordStr} coordStr coordinate string of the voxel
+	 * @param {THREE.Mesh} mesh The mesh to add
+	 */
+	function addMesh(sid, coordStr, mesh, uname) {
+		mesh.userData.username = uname
+		worldData[sid.a][sid.b][coordStr] = mesh
+	}
 
-    /**
-     * Remove a voxel from worldData
-     * @memberOf WorldData
-     * @access public
-     * @param  {VoxelUtils.GridVector3} gPos Grid position of
-     * the voxel to remove
-     */
-    function removeVoxel(gPos) {
-        let coordStr = VoxelUtils.getCoordStr(gPos)
-        let sid = VoxelUtils.getSectionIndices(gPos)
-        delete worldData[sid.a][sid.b][coordStr]
-    }
+	/**
+	 * Remove a voxel from worldData
+	 * @memberOf WorldData
+	 * @access public
+	 * @param  {VoxelUtils.GridVector3} gPos Grid position of
+	 * the voxel to remove
+	 */
+	function removeVoxel(gPos) {
+		let coordStr = VoxelUtils.getCoordStr(gPos)
+		let sid = VoxelUtils.getSectionIndices(gPos)
+		delete worldData[sid.a][sid.b][coordStr]
+	}
 
-    /**
-     * Retrieve a voxel with the specified
-     * section indices and coordStr
-     * @param  {VoxelUtils.GridVector3} gPos Grid position of
-     * the voxel to get
-     * @return {object} The mesh or object
-     * @access public
-     * @memberOf WorldData
-     */
-    function getVoxel(gPos) {
-        let coordStr = VoxelUtils.getCoordStr(gPos)
-        let sid = VoxelUtils.getSectionIndices(gPos)
-        return worldData[sid.a][sid.b][coordStr]
-    }
+	/**
+	 * Retrieve a voxel with the specified
+	 * section indices and coordStr
+	 * @param  {VoxelUtils.GridVector3} gPos Grid position of
+	 * the voxel to get
+	 * @return {object} The mesh or object
+	 * @access public
+	 * @memberOf WorldData
+	 */
+	function getVoxel(gPos) {
+		let coordStr = VoxelUtils.getCoordStr(gPos)
+		let sid = VoxelUtils.getSectionIndices(gPos)
+		return worldData[sid.a][sid.b][coordStr]
+	}
 
-    /**
-     * Add a coordinate to the attribute of the userData
-     * object with the given username
-     * @param {string} username The username index
-     * @param {VoxelUtils.GridVector3} gPos Grid coordinate to add
-     * @access public
-     * @memberOf WorldData
-     */
-    function addToUserData(username, gPos) {
+	/**
+	 * Add a coordinate to the attribute of the userData
+	 * object with the given username
+	 * @param {string} username The username index
+	 * @param {VoxelUtils.GridVector3} gPos Grid coordinate to add
+	 * @access public
+	 * @memberOf WorldData
+	 */
+	function addToUserData(username, gPos) {
 
-        if (!userData.hasOwnProperty(username)) userData[username] = {}
+		if (!userData.hasOwnProperty(username)) userData[username] = {}
 
-        if (!userData[username][gPos.x]) userData[username][gPos.x] = {}
-        if (!userData[username][gPos.x][gPos.y]) userData[username][gPos.x][gPos.y] = {}
-        if (!userData[username][gPos.x][gPos.y][gPos.z]) userData[username][gPos.x][gPos.y][gPos.z] = {}
+		if (!userData[username][gPos.x]) userData[username][gPos.x] = {}
+		if (!userData[username][gPos.x][gPos.y]) userData[username][gPos.x][gPos.y] = {}
+		if (!userData[username][gPos.x][gPos.y][gPos.z]) userData[username][gPos.x][gPos.y][gPos.z] = {}
 
-    }
+	}
 
-    /**
-     * Remove a coordinate from the attribute of
-     * userData that matches the given
-     * @param  {string} username The username index
-     * @param  {VoxelUtils.GridVector3} gPos Grid coordinate to remove
-     * @access public
-     * @memberOf WorldData
-     */
-    function removeFromUserData(username, gPos) {
+	/**
+	 * Remove a coordinate from the attribute of
+	 * userData that matches the given
+	 * @param  {string} username The username index
+	 * @param  {VoxelUtils.GridVector3} gPos Grid coordinate to remove
+	 * @access public
+	 * @memberOf WorldData
+	 */
+	function removeFromUserData(username, gPos) {
 
-        if (userData.hasOwnProperty(username)) {
+		if (userData.hasOwnProperty(username)) {
 
-            if (!userData[username][gPos.x]) return
-            if (!userData[username][gPos.x][gPos.y]) return
-            delete userData[username][gPos.x][gPos.y][gPos.z]
+			if (!userData[username][gPos.x]) return
+			if (!userData[username][gPos.x][gPos.y]) return
+			delete userData[username][gPos.x][gPos.y][gPos.z]
 
-        }
+		}
 
-    }
+	}
 
-    function getUsernameAtIntersect(intersect) {
+	function getUsernameAtIntersect(intersect) {
 
-        let gPos = VoxelUtils.getGridPositionFromIntersect(intersect)
-        if (!gPos) return
-        let voxel = WorldData.getVoxel(gPos)
+		let gPos = VoxelUtils.getGridPositionFromIntersect(intersect)
+		if (!gPos) return
+		let voxel = WorldData.getVoxel(gPos)
 
-        let username
-        if (voxel.isMesh) username = voxel.userData.username
-        username = voxel.username
+		let username
+		if (voxel.isMesh) username = voxel.userData.username
+		username = voxel.username
 
-        if (!username) return 'Guest'
-        return username
+		if (!username) return 'Guest'
+		return username
 
-    }
+	}
 
-    /**
-     * Return the voxels for the give username
-     * @param  {string} username The username index
-     * @return {Object} Voxels owned by that user
-     */
-    function getUserVoxels(username) {
-        return userData[username]
-    }
+	/**
+	 * Return the voxels for the give username
+	 * @param  {string} username The username index
+	 * @return {Object} Voxels owned by that user
+	 */
+	function getUserVoxels(username) {
+		return userData[username]
+	}
 
-    /**
-     * Return the worldData object
-     * @return {Ojbect} The world data
-     */
-    function getWorldData() {
-        return worldData
-    }
+	/**
+	 * Return the worldData object
+	 * @return {Ojbect} The world data
+	 */
+	function getWorldData() {
+		return worldData
+	}
 
-    /*********** expose public methods *************/
+	/*********** expose public methods *************/
 
-    return {
-        init: init,
-        loadIntoScene: loadIntoScene,
-        getVoxel: getVoxel,
-        addVoxel: addVoxel,
-        addMesh: addMesh,
-        getUserVoxels: getUserVoxels,
-        getWorldData: getWorldData,
-        removeVoxel: removeVoxel,
-        addToUserData: addToUserData,
-        removeFromUserData: removeFromUserData,
-        VoxelInfo: VoxelInfo,
-        getUsernameAtIntersect: getUsernameAtIntersect
-    }
+	return {
+		init: init,
+		loadIntoScene: loadIntoScene,
+		getVoxel: getVoxel,
+		addVoxel: addVoxel,
+		addMesh: addMesh,
+		getUserVoxels: getUserVoxels,
+		getWorldData: getWorldData,
+		removeVoxel: removeVoxel,
+		addToUserData: addToUserData,
+		removeFromUserData: removeFromUserData,
+		VoxelInfo: VoxelInfo,
+		getUsernameAtIntersect: getUsernameAtIntersect
+	}
 
 }()
