@@ -11,4 +11,4 @@ let dataSchema = new Schema({
     }
 }, {collection: dev + 'worldData'})
 
-module.exports = mongoose.model('VoxelData', dataSchema)
+module.exports = mongoose.model('Voxel', dataSchema)

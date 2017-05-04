@@ -1,6 +1,6 @@
 const config = require('./config.js').server
 const responses = require('./socketResponses.js')
-const VoxelData = require('./models/VoxelData')
+const Voxel = require('./models/Voxel')
 const Operation = require('./models/Operation')
 const User = require('./models/User').user
 
@@ -82,7 +82,7 @@ WorldData.add = function(voxel, username, cb) {
         }
     })
 
-    let vox = new VoxelData({
+    let vox = new Voxel({
         key: getPosStr(gPos),
         data: {
             c: parseInt(voxel.color),
@@ -156,7 +156,7 @@ WorldData.remove = function(gPos, username, cb) {
 
             // remove from the
             // data collection
-            VoxelData.remove({
+            Voxel.remove({
                 key: coordStr
             }, function(err2) {
                 if (dbErr(err2)) {
@@ -211,7 +211,7 @@ WorldData.getVoxel = function(gPos) {
 
 WorldData.init = function(done) {
 
-    VoxelData.find({}, function(err, data) {
+    Voxel.find({}, function(err, data) {
 
         if (dbErr(err)) {
             process.exit()

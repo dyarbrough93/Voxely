@@ -26,7 +26,7 @@ module.exports = function(passport, nev, devEnv, local) {
 
 	router.get('/guest', function(req, res) {
 		req.logout()
-		res.render('game', {guest: true})
+		res.render('editor', {guest: true})
 	})
 
 	router.get('/signout', function(req, res) {
@@ -44,7 +44,7 @@ module.exports = function(passport, nev, devEnv, local) {
 		const adminUName = local ? local.adminUName : process.env.ADMIN_UNAME
 		const admin = req.user.username === adminUName
 
-		res.render('game', {
+		res.render('editor', {
 			user: req.user,
 			dev: devEnv,
 			admin: admin

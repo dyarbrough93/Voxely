@@ -8,7 +8,8 @@ let userInfo = {
     firstName: String,
     lastName: String,
     password: {type: String, required: true},
-    email: {type: String, unique: true, required: true, dropDups: true}
+    email: {type: String, unique: true, required: true},
+    projects: [{type: Schema.Types.ObjectId, ref: 'Project'}]
 }
 
 let userSchema = new Schema(userInfo, {collection: dev + 'users'})
