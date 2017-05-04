@@ -292,9 +292,6 @@ let GUI = function(window, undefined) {
 			.addSubGroup({
 				label: 'Highlight Voxels by User'
 			})
-			.addStringOutput(settings.debug, 'hoveredUser', {
-				label: 'Owner'
-			})
 			.addColor(settings.highlight, 'color', {
 				label: 'Highlight Color'
 			})
@@ -391,10 +388,6 @@ let GUI = function(window, undefined) {
 		return controlKit
 	}
 
-	function getSSSP() {
-		return settings.sqPerSideOfSelectPlane
-	}
-
 	function setConnectedClients(num) {
 		settings.connectedClients = num
 	}
@@ -415,8 +408,7 @@ let GUI = function(window, undefined) {
 		resetActionTimer: resetActionTimer,
 		popCircleTimer: popCircleTimer,
 		getControlKit: getControlKit,
-		setConnectedClients: setConnectedClients,
-		getSSSP: getSSSP
+		setConnectedClients: setConnectedClients
 	}
 
 }(window)
