@@ -35,7 +35,8 @@ module.exports = function(passport, nev) {
                             password: createHash(password),
                             email: req.body.email,
                             firstName: req.body.firstName,
-                            lastName: req.body.lastName
+                            lastName: req.body.lastName,
+							projects: []
                         })
 
 						nev.createTempUser(newUser, function(err, existingPersistentUser, newTempUser) {

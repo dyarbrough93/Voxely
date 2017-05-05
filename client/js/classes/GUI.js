@@ -65,69 +65,13 @@ let GUI = function(window, undefined) {
 		guiClicked = false
 
 		initControlKit()
-
-		//if (User.getUName() === 'Guest') showModal()
-		/*else*/
-		$(document).trigger('modalClosed')
-
-		$('#welcome-modal').on('hidden.bs.modal', function() {
-			$(document).trigger('modalClosed')
-		})
-
-		// if it was the gui that was clicked,
-		// save this fact so that we can prevent
-		// world actions from taking place behind it
-		$('#controlKit *, .btn').mousedown(function() {
-			guiClicked = true
-			// this has to be assigned here because
-			// some elements don't exist on page load
-			$('#controlKit *').mousedown(function() {
-				guiClicked = true
-			})
-
-		})
+		initModals()
 
 		$(".btn").mouseup(function() {
 			$(this).blur()
 		})
 
-		// export
-
-		matFilename = 'voxelMats'
-
-		$('#download-obj').click(function() {
-
-			exportVoxels()
-
-			let objBlob = new Blob([exported.obj], {
-				type: 'text/plain'
-			})
-
-			saveAs(objBlob, 'voxels.obj')
-
-		})
-
-		$('#download-mtl').click(function() {
-
-			exportVoxels()
-
-			let mtlBlob = new Blob([exported.mtl], {
-				type: 'text/plain'
-			})
-
-			saveAs(mtlBlob, matFilename + '.mtl')
-
-		})
-
-		$('#download-json').click(function() {
-
-			let jsonBlob = new Blob([JSON.stringify(GameScene.getScene())], {
-				type: 'text/json'
-			})
-
-			saveAs(jsonBlob, 'voxels.json')
-
-		})
+		initExportButtons()
 
 	}
 
@@ -234,12 +178,12 @@ let GUI = function(window, undefined) {
 	 :: Private Methods
 	 *------------------------------------*/
 
-	 function exportVoxels() {
+	function exportVoxels() {
 
-		 var exporter = new THREE.OBJExporter()
-		 exported = exporter.parse(GameScene.getScene(), matFilename)
+		var exporter = new THREE.OBJExporter()
+		exported = exporter.parse(GameScene.getScene(), matFilename)
 
-	 }
+	}
 
 	/**
 	 * Add the necessary elements to the gui
@@ -306,13 +250,121 @@ let GUI = function(window, undefined) {
 				window.location = url + '/signout'
 			})
 
-			mainPanel.addGroup({
-					label: 'Debug',
-				})
-				.addButton('Log Scene', function() {
-					console.log(GameScene.getScene())
-				})
+		mainPanel.addGroup({
+				label: 'Debug',
+			})
+			.addButton('Log Scene', function() {
+				console.log(GameScene.getScene())
+			})
 
+		// if it was the gui that was clicked,
+		// save this fact so that we can prevent
+		// world actions from taking place behind it
+		$('#controlKit *, .btn').mousedown(function() {
+			guiClicked = true
+			// this has to be assigned here because
+			// some elements don't exist on page load
+			$('#controlKit *').mousedown(function() {
+				guiClicked = true
+			})
+
+		})
+
+	}
+
+	function initModals() {
+
+		let animSpeed = 185
+
+		$(document).trigger('modalClosed')
+
+		$('#welcome-modal').on('hidden.bs.modal', function() {
+			$(document).trigger('modalClosed')
+		})
+
+		$('#show-login').click(function() {
+
+			$(document).trigger('modalOpened')
+
+			$('#login-modal').css('z-index', 2)
+			$('#modal-background').css('z-index', 1)
+
+			$('#login-modal').animate({
+				opacity: 1
+			}, {
+				queue: false
+			}, animSpeed)
+
+			$('#modal-background').animate({
+				opacity: 0.5
+			}, {
+				queue: false
+			}, animSpeed)
+
+		})
+
+		$('#modal-background').click(function() {
+
+			$('#login-modal').animate({
+				opacity: 0
+			}, {
+				queue: false,
+				duration: animSpeed,
+				done: function() {
+					$('#login-modal').css('z-index', -1)
+				}
+			})
+
+			$('#modal-background').animate({
+				opacity: 0
+			}, {
+				queue: false,
+				duration: animSpeed,
+				done: function() {
+					$('#modal-background').css('z-index', -1)
+					$(document).trigger('modalClosed')
+				}
+			})
+		})
+	}
+
+	function initExportButtons() {
+
+		matFilename = 'voxelMats'
+
+		$('#download-obj').click(function() {
+
+			exportVoxels()
+
+			let objBlob = new Blob([exported.obj], {
+				type: 'text/plain'
+			})
+
+			saveAs(objBlob, 'voxels.obj')
+
+		})
+
+		$('#download-mtl').click(function() {
+
+			exportVoxels()
+
+			let mtlBlob = new Blob([exported.mtl], {
+				type: 'text/plain'
+			})
+
+			saveAs(mtlBlob, matFilename + '.mtl')
+
+		})
+
+		$('#download-json').click(function() {
+
+			let jsonBlob = new Blob([JSON.stringify(GameScene.getScene())], {
+				type: 'text/json'
+			})
+
+			saveAs(jsonBlob, 'voxels.json')
+
+		})
 	}
 
 	/**

@@ -33,13 +33,8 @@ const clientConfig = {
     },
     grid: {
         blockSize: 50, // even
-        sqPerSideOfSelectPlane: 41, // must be odd
-        sqPerSideOfSection: 51, // must be odd
-        sectionsPerSide: 3,
+        sqPerSideOfGrid: 50, // even, +1
         init: function() {
-            // must be odd
-            this.sqPerSideOfGrid = this.sqPerSideOfSection *
-                this.sectionsPerSide - 1
 
             // scene size of the grid; must be even
             this.size = this.sqPerSideOfGrid * (this.blockSize / 2)

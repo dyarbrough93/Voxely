@@ -40,13 +40,31 @@
             position: absolute;
         }
         .btn-info {
-            margin: 0 3px 0 3px;
+            margin: 0 3px;
         }
+
     </style>
 
 {% endblock %}
 
 {% block body %}
+
+    {% include 'login.nunjucks' %}
+
+    <style>
+
+        #modal-background {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background-color: black;
+            opacity: 0;
+            z-index: -1;
+        }
+
+    </style>
+
+    <div id="modal-background"></div>
 
     <div id="user" hidden>
         {% if user %}
@@ -60,6 +78,7 @@
         <a id="download-obj" class="btn btn-info" role="button">Download Obj</a>
         <a id="download-mtl" class="btn btn-info" role="button">Download Mtl</a>
         <a id="download-json" class="btn btn-info" role="button">Download JSON</a>
+        <a id="show-login" class="btn btn-warning" role="button">Show Login</a>
     </div>
 
     {% include './circleTimers.nunjucks' %}

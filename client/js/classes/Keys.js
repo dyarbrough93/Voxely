@@ -29,7 +29,8 @@ let Keys = function(window, undefined) {
             ctrlDown: false
         }
 
-        addEventListeners()
+        $(document).on('modalClosed', addEventListeners)
+		$(document).on('modalOpened', removeEventListeners)
 
     }
 
@@ -124,10 +125,6 @@ let Keys = function(window, undefined) {
 
         }
 
-        // 1-3
-        if (e.keyCode >= 49 && e.keyCode <= 51)
-            numberDown(e)
-
     }
 
     /**
@@ -149,24 +146,6 @@ let Keys = function(window, undefined) {
                 break
 
         }
-
-    }
-
-    /**
-     * Handle number presses
-     * @memberOf Keys
-     * @access private
-     * @param  {Event} e
-     */
-    function numberDown(e) {
-
-        e.preventDefault()
-
-        let colorNum = e.keyCode - 48
-
-        if (keyStates.ctrlDown)
-            GUI.setSavedColor(colorNum)
-        else GUI.loadSavedColor(colorNum)
 
     }
 
