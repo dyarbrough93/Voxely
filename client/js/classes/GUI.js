@@ -14,6 +14,10 @@ let GUI = function(window, undefined) {
 	let controlKit
 	let guiClicked
 
+	// export
+	let exported
+	let matFilename
+
 	/*------------------------------------*
 	 :: Public Methods
 	 *------------------------------------*/
@@ -64,7 +68,8 @@ let GUI = function(window, undefined) {
 		initControlKit()
 
 		//if (User.getUName() === 'Guest') showModal()
-		/*else*/ $(document).trigger('modalClosed')
+		/*else*/
+		$(document).trigger('modalClosed')
 
 		$('#welcome-modal').on('hidden.bs.modal', function() {
 			$(document).trigger('modalClosed')
@@ -85,6 +90,34 @@ let GUI = function(window, undefined) {
 
 		$(".btn").mouseup(function() {
 			$(this).blur()
+		})
+
+		// export
+
+		matFilename = 'voxelMats'
+
+		$('#download-obj').click(function() {
+
+			if (!exported) exportVoxels()
+
+			var objBlob = new Blob([exported.obj], {
+				type: 'text/plain'
+			})
+
+			saveAs(objBlob, 'voxels.obj')
+
+		})
+
+		$('#download-mtl').click(function() {
+
+			if (!exported) exportVoxels()
+
+			var mtlBlob = new Blob([exported.mtl], {
+				type: 'text/plain'
+			})
+
+			saveAs(mtlBlob, matFilename + '.mtl')
+
 		})
 
 	}
@@ -184,54 +217,6 @@ let GUI = function(window, undefined) {
 		}
 	}
 
-	function resetActionTimer(ms, timerID) {
-
-		let r = parseInt($(timerID + ' circle').attr('r'))
-		let circumf = 2 * Math.PI * r
-
-		$(timerID).css('display', 'block')
-		$(timerID).css('stroke-dasharray', circumf)
-
-		$(timerID + ' .circle_animation').css('stroke-dashoffset', circumf)
-		$(timerID + ' .circle_animation').animate({
-			'stroke-dashoffset': 0
-		}, {
-			duration: ms - 150,
-			queue: false,
-			complete: function() {
-				$(timerID).fadeOut(150)
-			}
-		})
-
-	}
-
-	function popCircleTimer(timerID) {
-
-		let strokeWidth = parseInt($(timerID + ' circle').attr('stroke-width'))
-		let strokeColor = $(timerID + ' circle').attr('stroke')
-		let newStrokeColor = '#7e2929'
-		let newStrokeWidth = strokeWidth + 1
-
-		let popSpeed = 125
-
-		$(timerID + ' .circle_animation').css({
-			'stroke': newStrokeColor,
-			transition: popSpeed
-		})
-		$(timerID + ' .circle_animation').animate({
-			'stroke-width': newStrokeWidth
-		}, popSpeed, function() {
-			$(timerID + ' .circle_animation').css({
-				'stroke': strokeColor,
-				transition: popSpeed
-			})
-			$(timerID + ' .circle_animation').animate({
-				'stroke-width': strokeWidth
-			}, popSpeed)
-		})
-
-	}
-
 	function showModal() {
 		$('#welcome-modal').modal()
 	}
@@ -239,6 +224,13 @@ let GUI = function(window, undefined) {
 	/*------------------------------------*
 	 :: Private Methods
 	 *------------------------------------*/
+
+	 function exportVoxels() {
+
+		 var exporter = new THREE.OBJExporter()
+		 exported = exporter.parse(GameScene.getScene(), matFilename)
+
+	 }
 
 	/**
 	 * Add the necessary elements to the gui
@@ -304,6 +296,13 @@ let GUI = function(window, undefined) {
 				let url = window.location.protocol + '//' + window.location.host
 				window.location = url + '/signout'
 			})
+
+			mainPanel.addGroup({
+					label: 'Debug',
+				})
+				.addButton('Log Scene', function() {
+					console.log(GameScene.getScene())
+				})
 
 	}
 
@@ -380,8 +379,6 @@ let GUI = function(window, undefined) {
 		setPickColor: setPickColor,
 		setCoords: setCoords,
 		togglePickColor: togglePickColor,
-		resetActionTimer: resetActionTimer,
-		popCircleTimer: popCircleTimer,
 		getControlKit: getControlKit,
 		setConnectedClients: setConnectedClients
 	}
