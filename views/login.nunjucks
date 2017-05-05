@@ -64,9 +64,6 @@
                 <p class="message">Not registered?
                     <a href="#">Create an account</a>
                 </p>
-                <p>Or
-                    <a href="/guest">Play as a Guest</a>
-                </p>
             </form>
         </div>
     </div>

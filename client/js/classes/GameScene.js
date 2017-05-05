@@ -41,10 +41,6 @@ let GameScene = function(window, undefined) {
     let ghostMesh
     let deleteMesh
 
-    // particle systems
-    let particleSystem
-    let pSystemExpansion
-
     /*------------------------------------*
      :: Public methods
      *------------------------------------*/
@@ -284,16 +280,6 @@ let GameScene = function(window, undefined) {
 
         })()
 
-        ;
-        (function _initParticleSystems() {
-
-            let sps = Config.getGrid().sectionsPerSide
-
-            particleSystem = new ParticleSystems.ParticleSystem(sps, scene)
-            pSystemExpansion = new ParticleSystems.PSystemExpansion(100000, scene)
-
-        })()
-
         window.addEventListener('resize', onWindowResize)
 
     }
@@ -453,14 +439,6 @@ let GameScene = function(window, undefined) {
 
     /******************Getters *************/
 
-    function getPSystem() {
-        return particleSystem
-    }
-
-    function getPSystemExpo() {
-        return pSystemExpansion
-    }
-
     function getMapControlsPlane() {
         return mapControlsPlane
     }
@@ -510,8 +488,6 @@ let GameScene = function(window, undefined) {
         getMapControlsPlane: getMapControlsPlane,
         getScene: getScene,
         getCamera: getCamera,
-        getPSystem: getPSystem,
-        getPSystemExpo: getPSystemExpo,
         setDirLightPos: setDirLightPos,
         render: render
 

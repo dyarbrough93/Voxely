@@ -139,7 +139,6 @@ let VoxelActions = function(window, undefined) {
         GameScene.removeFromScene(vox)
 
         let username = vox.isMesh ? vox.userData.username : vox.username
-        WorldData.removeFromUserData(username, gPos)
         WorldData.removeVoxel(gPos)
 
         Raycast.remove(vox)

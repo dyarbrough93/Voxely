@@ -57,7 +57,6 @@ let GUI = function(window, undefined) {
 				useAA: Config.getGeneral().aaOnByDefault
 			},
 			coords: '',
-			sqPerSideOfSelectPlane: Config.getGrid().sqPerSideOfSelectPlane,
 			sliderRange: [5, 101],
 			connectedClients: 0
 		}

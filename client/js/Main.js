@@ -24,7 +24,6 @@ var Main = function() {
         WorldData.init()
         Keys.init()
         MapControls.init()
-        BufMeshMgr.init()
         SocketHandler.init()
 
         // download the world data and

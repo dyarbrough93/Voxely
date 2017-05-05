@@ -184,26 +184,6 @@ let VoxelUtils = (function(window, undefined) {
     }
 
     /**
-     * Get the section indices of the specified grid position.
-     * @memberOf VoxelWorld
-     * @param {VoxelUtils.GridVector3} gPos Grid position to check
-     * @returns {voxelUtils.Point}
-     */
-    function getSectionIndices(gPos) {
-
-        let gridConfig = Config.getGrid()
-
-        let sqPerSGrid = gridConfig.sqPerSideOfGrid
-        let sqPerSSect = gridConfig.sqPerSideOfSection
-
-        return new Tuple(
-            Math.floor((gPos.x + sqPerSGrid / 2) / sqPerSSect),
-            Math.floor((gPos.z + sqPerSGrid / 2) / sqPerSSect)
-        )
-
-    }
-
-    /**
      * Check if the given position is within
      * the global height limit
      * @param  {VoxelUtils.GridVector3} gPos The position
@@ -464,7 +444,6 @@ let VoxelUtils = (function(window, undefined) {
         initVoxel: initVoxel,
         countObjAttrs: countObjAttrs,
         Tuple: Tuple,
-        getSectionIndices: getSectionIndices,
         buildOutlineGeom: buildOutlineGeom,
         hexStringToDec: hexStringToDec,
         getGridPositionFromIntersect: getGridPositionFromIntersect
