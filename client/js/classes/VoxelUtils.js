@@ -65,7 +65,9 @@ let VoxelUtils = (function(window, undefined) {
      */
     THREE.Vector3.prototype.worldToGrid = function() {
 
-        this.divideScalar(50)
+        let blockSize = Config.getGrid().blockSize
+
+        this.divideScalar(blockSize)
 
         this.setComponent(0, Math.round(this.x))
         this.setComponent(1, Math.floor(this.y))
@@ -85,7 +87,9 @@ let VoxelUtils = (function(window, undefined) {
      */
     THREE.Vector3.prototype.gridToWorld = function() {
 
-        this.multiplyScalar(50)
+        let blockSize = Config.getGrid().blockSize
+
+        this.multiplyScalar(blockSize)
         this.setComponent(1, this.y + 25)
 
         this.isWorldPos = true
@@ -267,14 +271,8 @@ let VoxelUtils = (function(window, undefined) {
 
         let geom = new THREE.BoxGeometry(blockSize, blockSize, blockSize),
             material = new THREE.MeshLambertMaterial({
-                vertexColors: THREE.VertexColors
+                color: args.color
             })
-
-        let color = args.color || 0
-        for (let i = 0; i < geom.faces.length; i++) {
-            let face = geom.faces[i]
-            face.color.setHex(color)
-        }
 
         let mesh = new THREE.Mesh(geom, material)
         mesh.castShadow = true
@@ -390,6 +388,18 @@ let VoxelUtils = (function(window, undefined) {
         return parseInt(hexString.substring(1), 16)
     }
 
+    function hexStringToRgb(hexString) {
+
+        let hs = hexString.charAt(0) === '#' ? hexString.substring(1) : hexString
+
+        return {
+            r: parseInt(hs.substring(0, 2), 16) / 255,
+            g: parseInt(hs.substring(2, 4), 16) / 255,
+            b: parseInt(hs.substring(4, 6), 16) / 255
+        }
+
+    }
+
     /*------------------------------------*
      :: Private methods
      *------------------------------------*/
@@ -440,18 +450,6 @@ let VoxelUtils = (function(window, undefined) {
             return v
         })
         geom.elementsNeedUpdate = true // update faces
-
-    }
-
-    function hexStringToRgb(hexString) {
-
-        let hs = hexString.charAt(0) === '#' ? hexString.substring(1) : hexString
-
-        return {
-            r: parseInt(hs.substring(0, 2), 16) / 255,
-            g: parseInt(hs.substring(2, 4), 16) / 255,
-            b: parseInt(hs.substring(4, 6), 16) / 255
-        }
 
     }
 

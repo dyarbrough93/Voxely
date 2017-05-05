@@ -262,9 +262,11 @@ let GameScene = function(window, undefined) {
             // cube rendered over voxel when hovered and shift is held
             (function _initDeleteVoxel() {
 
+                let size = gridConfig.blockSize + (gridConfig.blockSize * 0.02)
+
                 let redXTexture = new THREE.ImageUtils.loadTexture('img/redx.png')
 
-                let deleteGeo = new THREE.CubeGeometry(51, 51, 51)
+                let deleteGeo = new THREE.CubeGeometry(size, size, size)
                 let deleteMat = new THREE.MeshPhongMaterial({
                     map: redXTexture,
                     color: 0xffffff,

@@ -164,11 +164,7 @@ let WorldData = function(window, undefined) {
 				if (i === 0) console.log(wPos)
 				// ^^^ somehow fixes raycast lag*/
 
-				BufMeshMgr.addVoxel(i, wPos, tColor)
-				currVox.bIdx = i
-
-				let voxInfo = new VoxelInfo(hColor, i)
-				addVoxel(gPos, voxInfo)
+				VoxelActions.createVoxelAtGridPos(gPos, '#' + tColor.getHexString())
 
 			}
 

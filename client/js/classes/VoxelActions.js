@@ -37,7 +37,7 @@ let VoxelActions = function(window, undefined) {
      * to create the voxel at
      * @param  {string} hexString Hex color of the voxel
      */
-    function createVoxelAtGridPos(gPos, hexString, username) {
+    function createVoxelAtGridPos(gPos, hexString) {
 
         let voxelMesh = VoxelUtils.initVoxel({
             color: VoxelUtils.hexStringToDec(hexString),
@@ -93,25 +93,6 @@ let VoxelActions = function(window, undefined) {
     }
 
     /**
-     * Deletes a voxel mesh. This is a voxel that
-     * was newly created after the conversion from
-     * pixels to voxels
-     * @memberOf VoxelActions
-     * @access public
-     * @param  {VoxelUtils.GridVector3} gPos Grid position of the voxel to delete
-     */
-    function deleteVoxelAtGridPos(gPos) {
-
-        let voxel = WorldData.getVoxel(gPos)
-
-        // newly created, delete mesh
-        if (voxel.isMesh) deleteNewVoxel(gPos)
-        // part of buffer geom, delete from buf
-        else deleteMergedVoxel(gPos, false)
-
-    }
-
-    /**
      * Deletes a voxel at a position based on the
      * given intersect
      * @memberOf VoxelActions
@@ -123,11 +104,7 @@ let VoxelActions = function(window, undefined) {
 
         let iobj = intersect.object
 
-        if (iobj.name !== 'plane') {
-
-            let successFunc
-            if (iobj.name === 'voxel') successFunc = deleteNewVoxel
-            else successFunc = deleteMergedVoxel
+        if (iobj.name === 'voxel') {
 
             let gPos = VoxelUtils.getGridPositionFromIntersect(intersect)
             if (!gPos) return done(false)
@@ -135,21 +112,15 @@ let VoxelActions = function(window, undefined) {
             SocketHandler.emitBlockRemoved(gPos, function(response) {
                 let responses = SocketResponses.get()
                 if (response === responses.success) {
-                    successFunc(gPos)
+                    deleteVoxelAtGridPos(gPos)
                     return done(true)
                 } else { // handle errs
                     console.debug(response)
                     return done(false)
                 }
             })
-
         }
-
     }
-
-    /*------------------------------------*
-     :: Private Methods
-     *------------------------------------*/
 
     /**
      * Deletes a specified voxel mesh. This is a voxel that has been added to the
@@ -158,7 +129,7 @@ let VoxelActions = function(window, undefined) {
      * @access private
      * @param {VoxelUtils.GridVector3} gPos Grid position of the voxel to delete
      */
-    function deleteNewVoxel(gPos) {
+    function deleteVoxelAtGridPos(gPos) {
 
         let vox = WorldData.getVoxel(gPos)
 
@@ -177,36 +148,14 @@ let VoxelActions = function(window, undefined) {
 
     }
 
-    /**
-     * Deletes a specified voxel from the buffer geometry. This is a voxel
-     * that was created upon initial conversion from pixels to voxels.
-     * @memberOf VoxelActions
-     * @access private
-     * @param {VoxelUtils.GridVector3} gPos Grid position of the voxel to delete
-     */
-    function deleteMergedVoxel(gPos) {
-
-        let vox = WorldData.getVoxel(gPos)
-        let coordStr = VoxelUtils.getCoordStr(gPos)
-
-        BufMeshMgr.removeVoxel(vox.bIdx)
-
-        let username = vox.isMesh ? vox.userData.username : vox.username
-        WorldData.removeFromUserData(username, gPos)
-        WorldData.removeVoxel(gPos)
-
-        GameScene.render()
-
-    }
-
     /*********** expose public methods *************/
 
     return {
 
         createVoxelAtGridPos: createVoxelAtGridPos,
         createVoxelAtIntersect: createVoxelAtIntersect,
-        deleteVoxelAtIntersect: deleteVoxelAtIntersect,
-        deleteVoxelAtGridPos: deleteVoxelAtGridPos
+        deleteVoxelAtGridPos: deleteVoxelAtGridPos,
+        deleteVoxelAtIntersect: deleteVoxelAtIntersect
 
     }
 
