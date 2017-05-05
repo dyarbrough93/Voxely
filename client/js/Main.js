@@ -16,13 +16,13 @@ var Main = function() {
         })
 
         // initialize classes
+        User.init()
         Mouse.init()
         GUI.init()
         Raycast.init()
         GameScene.init()
         WorldData.init()
         Keys.init()
-        User.init()
         MapControls.init()
         BufMeshMgr.init()
         SocketHandler.init()

@@ -30,8 +30,7 @@ let User = function(window, undefined) {
 
         states = {
             DEFAULT: 0,
-            PICKCOLOR: 1,
-            HIGHLIGHT: 2
+            PICKCOLOR: 1
         }
 
         setDefaultState()
@@ -75,7 +74,6 @@ let User = function(window, undefined) {
      */
     function setDefaultState() {
         state = states.DEFAULT
-        GameScene.removeOutlines()
         $('body').css('cursor', 'url(/img/default.cur), auto')
     }
 
@@ -87,11 +85,6 @@ let User = function(window, undefined) {
     function setPickState() {
         state = states.PICKCOLOR
         $('body').css('cursor', 'url(/img/picker.cur), auto')
-    }
-
-    function setHighlightState() {
-        state = states.HIGHLIGHT
-        $('body').css('cursor', 'url(/img/highlight.cur), auto')
     }
 
     function setCurrentHoveredUser(user) {
@@ -108,10 +101,6 @@ let User = function(window, undefined) {
      */
     function stateIsPick() {
         return state === states.PICKCOLOR
-    }
-
-    function stateIsHighlight() {
-        return state === states.HIGHLIGHT
     }
 
     function stateIsDefault() {
@@ -142,10 +131,8 @@ let User = function(window, undefined) {
         getUName: getUName,
         resetActionTimer: resetActionTimer,
         stateIsPick: stateIsPick,
-        stateIsHighlight: stateIsHighlight,
         stateIsDefault: stateIsDefault,
         setDefaultState: setDefaultState,
-        setHighlightState: setHighlightState,
         setPickState: setPickState,
         getCurrentHoveredUser: getCurrentHoveredUser,
         setCurrentHoveredUser: setCurrentHoveredUser,

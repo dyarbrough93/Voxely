@@ -144,7 +144,6 @@ let WorldData = function(window, undefined) {
 
 		let gPos
 		let wPos
-		let sid
 		let currVox
 
 		let i = 0
@@ -154,7 +153,6 @@ let WorldData = function(window, undefined) {
 
 			gPos = VoxelUtils.coordStrParse(voxPos).initGridPos()
 			wPos = gPos.clone().gridToWorld()
-			sid = VoxelUtils.getSectionIndices(gPos)
 			currVox = data[voxPos]
 
 			if (VoxelUtils.validBlockLocation(gPos)) {
@@ -170,7 +168,7 @@ let WorldData = function(window, undefined) {
 				currVox.bIdx = i
 
 				let voxInfo = new VoxelInfo(hColor, i)
-				addVoxel(sid, voxPos, voxInfo)
+				addVoxel(gPos, voxInfo)
 
 			}
 
@@ -190,12 +188,11 @@ let WorldData = function(window, undefined) {
 	 * parameters.
 	 * @memberOf WorldData
 	 * @access public
-	 * @param {VoxelUtils.Tuple} sid Section indices
-	 * @param {VoxelUtils.coordStr} coordStr Coordinate string (grid coords)
 	 * @param {WorldData.VoxelInfo} voxInfo Object containing the voxel information
 	 */
-	function addVoxel(sid, coordStr, voxInfo) {
-
+	function addVoxel(gPos, voxInfo) {
+		let coordStr = VoxelUtils.getCoordStr(gPos)
+		let sid = VoxelUtils.getSectionIndices(gPos)
         worldData[sid.a][sid.b][coordStr] = voxInfo
 	}
 
@@ -207,8 +204,9 @@ let WorldData = function(window, undefined) {
 	 * @param {VoxelUtils.coordStr} coordStr coordinate string of the voxel
 	 * @param {THREE.Mesh} mesh The mesh to add
 	 */
-	function addMesh(sid, coordStr, mesh, uname) {
-		mesh.userData.username = uname
+	function addMesh(gPos, mesh) {
+		let coordStr = VoxelUtils.getCoordStr(gPos)
+		let sid = VoxelUtils.getSectionIndices(gPos)
 		worldData[sid.a][sid.b][coordStr] = mesh
 	}
 

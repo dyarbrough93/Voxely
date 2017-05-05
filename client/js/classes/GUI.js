@@ -53,11 +53,6 @@ let GUI = function(window, undefined) {
 				useAA: Config.getGeneral().aaOnByDefault
 			},
 			coords: '',
-			highlight: {
-				offText: 'Start Highlighting',
-				onText: 'Stop Highlighting (or ESC)',
-				color: '#000000'
-			},
 			sqPerSideOfSelectPlane: Config.getGrid().sqPerSideOfSelectPlane,
 			sliderRange: [5, 101],
 			connectedClients: 0
@@ -68,8 +63,8 @@ let GUI = function(window, undefined) {
 
 		initControlKit()
 
-		if (User.getUName() === 'Guest') showModal()
-		else $(document).trigger('modalClosed')
+		//if (User.getUName() === 'Guest') showModal()
+		/*else*/ $(document).trigger('modalClosed')
 
 		$('#welcome-modal').on('hidden.bs.modal', function() {
 			$(document).trigger('modalClosed')
@@ -90,15 +85,6 @@ let GUI = function(window, undefined) {
 
 		$(".btn").mouseup(function() {
 			$(this).blur()
-		})
-
-		$('#circleTimerHelp').mousedown(function() {
-			guiClicked = true
-			$(document).trigger('modalOpened')
-		})
-
-		$('#timerHelpModal').on('hidden.bs.modal', function() {
-			$(document).trigger('modalClosed')
 		})
 
 	}
@@ -198,10 +184,6 @@ let GUI = function(window, undefined) {
 		}
 	}
 
-	function getHighlightColor() {
-		return settings.highlight.color
-	}
-
 	function resetActionTimer(ms, timerID) {
 
 		let r = parseInt($(timerID + ' circle').attr('r'))
@@ -289,12 +271,6 @@ let GUI = function(window, undefined) {
 			})
 			.addButton('Color Picker', togglePickColor)
 			.addButton('Random Color', settings.colors.randomColor)
-			.addSubGroup({
-				label: 'Highlight Voxels by User'
-			})
-			.addColor(settings.highlight, 'color', {
-				label: 'Highlight Color'
-			})
 
 		mainPanel.addGroup({
 				label: 'Info',
@@ -403,7 +379,6 @@ let GUI = function(window, undefined) {
 		setClicked: setClicked,
 		setPickColor: setPickColor,
 		setCoords: setCoords,
-		getHighlightColor: getHighlightColor,
 		togglePickColor: togglePickColor,
 		resetActionTimer: resetActionTimer,
 		popCircleTimer: popCircleTimer,

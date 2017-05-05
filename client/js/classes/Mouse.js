@@ -70,7 +70,6 @@ let Mouse = function(window, undefined) {
 			GUI.setClicked(false)
 			return
 		}
-		if (User.stateIsHighlight()) return
 		if (e.which === 1) leftDown(e)
 	}
 
@@ -147,9 +146,6 @@ let Mouse = function(window, undefined) {
 				GameScene.updateGhostMesh(intersect)
 				GameScene.updateDeleteMesh(intersect)
 			}
-
-			if (User.stateIsHighlight())
-				GameScene.highlightUserVoxels(intersect)
 
 		}
 

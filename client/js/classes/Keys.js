@@ -178,9 +178,7 @@ let Keys = function(window, undefined) {
     function escDown() {
 
         if (!User.stateIsDefault()) {
-            if (User.stateIsHighlight())
-                GUI.toggleHighlight()
-            else if (User.stateIsPick())
+            if (User.stateIsPick())
                 GUI.togglePickColor()
             User.setDefaultState()
         }
