@@ -35,6 +35,16 @@
          camMiny  = config.camMiny
          camMaxy  = config.camMaxy
 
+         // set target at center
+         let e = $.Event('mousemove')
+         e.clientX = 0
+         e.clientY = 0
+
+ 		 onMouseDown(e)
+
+         // initialize the directional light position
+         GameScene.setDirLightPos(camera.position, target)
+
      }
 
     // internals

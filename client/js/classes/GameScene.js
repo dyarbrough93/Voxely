@@ -156,27 +156,6 @@ let GameScene = function(window, undefined) {
 
             })()
 
-            // This is the floor that is actually visible. It has to be offset
-            // to reduce flickering from the selection plane
-            /*;
-            (function _floorPlane() {
-
-                let floorGeom = new THREE.PlaneGeometry(stdSideLen, stdSideLen)
-                floorGeom.rotateX(-Math.PI / 2)
-                floorGeom.translate(0, -25, 0)
-
-                let floorMat = new THREE.MeshBasicMaterial({
-                    color: '#ffffff',
-                    opacity: '0.15',
-                    transparent: true
-                })
-
-                let floorPlane = new THREE.Mesh(floorGeom, floorMat)
-
-                scene.add(floorPlane)
-
-            })()*/
-
             ;
             (function _floorGrid() {
 
