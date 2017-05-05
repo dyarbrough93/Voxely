@@ -59,6 +59,7 @@
         <a href="https://discordapp.com/channels/301547797134442496/301547797134442496" target="_blank" class="btn btn-primary" role="button">Discord</a>
         <a id="download-obj" class="btn btn-info" role="button">Download Obj</a>
         <a id="download-mtl" class="btn btn-info" role="button">Download Mtl</a>
+        <a id="download-json" class="btn btn-info" role="button">Download JSON</a>
     </div>
 
     {% include './circleTimers.nunjucks' %}

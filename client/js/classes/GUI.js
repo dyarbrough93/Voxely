@@ -99,7 +99,7 @@ let GUI = function(window, undefined) {
 
 			exportVoxels()
 
-			var objBlob = new Blob([exported.obj], {
+			let objBlob = new Blob([exported.obj], {
 				type: 'text/plain'
 			})
 
@@ -111,11 +111,21 @@ let GUI = function(window, undefined) {
 
 			exportVoxels()
 
-			var mtlBlob = new Blob([exported.mtl], {
+			let mtlBlob = new Blob([exported.mtl], {
 				type: 'text/plain'
 			})
 
 			saveAs(mtlBlob, matFilename + '.mtl')
+
+		})
+
+		$('#download-json').click(function() {
+
+			let jsonBlob = new Blob([JSON.stringify(GameScene.getScene())], {
+				type: 'text/json'
+			})
+
+			saveAs(jsonBlob, 'voxels.json')
 
 		})
 
