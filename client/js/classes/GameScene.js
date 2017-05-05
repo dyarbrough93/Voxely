@@ -184,7 +184,7 @@ let GameScene = function(window, undefined) {
 					drawLine(gridGeom, i)
 				}
 
-				let material = new THREE.LineBasicMaterial({ color: 0x000000, opacity: 0.2, transparent: true })
+				let material = new THREE.LineBasicMaterial({ color: 0x000000, opacity: 0.15, transparent: true })
 
 				let gridLines = new THREE.LineSegments(gridGeom, material)
 				let outlineLines = new THREE.LineSegments(gridOutlineGeom, material)

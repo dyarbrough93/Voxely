@@ -97,7 +97,7 @@ let GUI = function(window, undefined) {
 
 		$('#download-obj').click(function() {
 
-			if (!exported) exportVoxels()
+			exportVoxels()
 
 			var objBlob = new Blob([exported.obj], {
 				type: 'text/plain'
@@ -109,7 +109,7 @@ let GUI = function(window, undefined) {
 
 		$('#download-mtl').click(function() {
 
-			if (!exported) exportVoxels()
+			exportVoxels()
 
 			var mtlBlob = new Blob([exported.mtl], {
 				type: 'text/plain'
