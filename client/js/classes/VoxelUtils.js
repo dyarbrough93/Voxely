@@ -443,12 +443,25 @@ let VoxelUtils = (function(window, undefined) {
 
     }
 
+    function hexStringToRgb(hexString) {
+
+        let hs = hexString.charAt(0) === '#' ? hexString.substring(1) : hexString
+
+        return {
+            r: parseInt(hs.substring(0, 2), 16) / 255,
+            g: parseInt(hs.substring(2, 4), 16) / 255,
+            b: parseInt(hs.substring(4, 6), 16) / 255
+        }
+
+    }
+
     /*********** expose public methods *************/
 
     return {
         withinGridBoundaries: withinGridBoundaries,
         validBlockLocation: validBlockLocation,
         coordStrParse: coordStrParse,
+        hexStringToRgb: hexStringToRgb,
         getCoordStr: getCoordStr,
         initVoxel: initVoxel,
         countObjAttrs: countObjAttrs,

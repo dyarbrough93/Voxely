@@ -11,6 +11,23 @@ let VoxelActions = function(window, undefined) {
      :: Public Methods
      *------------------------------------*/
 
+     function createWireMesh(mesh, gPos, hexString) {
+
+         let rgb = VoxelUtils.hexStringToRgb(hexString)
+         let col = new THREE.Color(rgb.r - 0.05, rgb.g - 0.05, rgb.b - 0.05)
+
+         let wireMesh = new THREE.LineSegments(
+             new THREE.EdgesGeometry(mesh.geometry),
+             new THREE.LineBasicMaterial({color: col, linewidth: 3})
+         )
+
+         let wPos = gPos.clone().gridToWorld()
+         wireMesh.position.copy(wPos)
+
+         return wireMesh
+
+     }
+
     /**
      * Creates a voxel mesh at the specified
      * grid position
@@ -27,16 +44,13 @@ let VoxelActions = function(window, undefined) {
             gPos: gPos
         })
 
-        let sid = VoxelUtils.getSectionIndices(gPos)
+        voxelMesh.wireMesh = createWireMesh(voxelMesh, gPos, hexString)
 
-        let coordStr = VoxelUtils.getCoordStr(gPos)
-        WorldData.addMesh(sid, coordStr, voxelMesh, username)
-
+        WorldData.addMesh(gPos, voxelMesh)
         Raycast.add(voxelMesh)
 
-        WorldData.addToUserData(username, gPos)
-
         GameScene.addToScene(voxelMesh)
+        GameScene.addToScene(voxelMesh.wireMesh)
         GameScene.render()
 
     }
@@ -150,6 +164,7 @@ let VoxelActions = function(window, undefined) {
 
         let coordStr = VoxelUtils.getCoordStr(gPos)
 
+        GameScene.removeFromScene(vox.wireMesh)
         GameScene.removeFromScene(vox)
 
         let username = vox.isMesh ? vox.userData.username : vox.username

@@ -33,6 +33,10 @@ let GameScene = function(window, undefined) {
     let mapControlsPlane
     let rspColors
 
+    // grid
+    let gridGeom
+    let gridOutlineGeom
+
     // meshes
     let ghostMesh
     let deleteMesh
@@ -65,7 +69,7 @@ let GameScene = function(window, undefined) {
                 fov: 45,
                 near: 100,
                 far: 300000,
-                distMult: 0.4
+                distMult: 0.075
             }
 
             let aspect = window.innerWidth / window.innerHeight
@@ -158,7 +162,7 @@ let GameScene = function(window, undefined) {
 
             // This is the floor that is actually visible. It has to be offset
             // to reduce flickering from the selection plane
-            ;
+            /*;
             (function _floorPlane() {
 
                 let floorGeom = new THREE.PlaneGeometry(stdSideLen, stdSideLen)
@@ -174,6 +178,43 @@ let GameScene = function(window, undefined) {
                 let floorPlane = new THREE.Mesh(floorGeom, floorMat)
 
                 scene.add(floorPlane)
+
+            })()*/
+
+            ;
+            (function _floorGrid() {
+
+                gridGeom = new THREE.Geometry()
+                gridOutlineGeom = new THREE.Geometry()
+
+                function drawLine(geom, i) {
+
+                    geom.vertices.push(new THREE.Vector3(-size - 25, 0, i))
+                    geom.vertices.push(new THREE.Vector3( size + 25, 0, i))
+
+                    geom.vertices.push(new THREE.Vector3(i, 0, -size - 25))
+                    geom.vertices.push(new THREE.Vector3(i, 0,  size + 25))
+
+                }
+
+                let step = gridConfig.blockSize
+                let size = (gridConfig.sqPerSideOfGrid / 2) * blockSize
+
+                // grid outline
+                drawLine(gridOutlineGeom, -size - 25)
+                drawLine(gridOutlineGeom,  size + 25)
+
+                // grid
+                for (let i = -size + 25; i <= size - 25; i += step) {
+					drawLine(gridGeom, i)
+				}
+
+				let material = new THREE.LineBasicMaterial({ color: 0x000000, opacity: 0.2, transparent: true })
+
+				let gridLines = new THREE.LineSegments(gridGeom, material)
+				let outlineLines = new THREE.LineSegments(gridOutlineGeom, material)
+				scene.add(gridLines)
+				scene.add(outlineLines)
 
             })()
 
@@ -355,69 +396,6 @@ let GameScene = function(window, undefined) {
     }
 
     /**
-     * Highlight all voxels owned by the voxel
-     * that is currently intersected
-     * @access public
-     * @memberOf GameScene
-     * @param  {THREE.Intersect} intersect The intersect
-     */
-    function highlightUserVoxels(intersect) {
-
-        // return and reset if shouldn't highlight
-        if (intersect.object.name === 'plane') {
-            removeOutlines()
-            GUI.displayString('')
-            return
-        }
-
-        // get grid / world pos
-        let wPos = intersect.point.clone().sub(intersect.face.normal)
-        let gPos = intersect.point.clone().sub(intersect.face.normal)
-        wPos.initWorldPos().snapToGrid()
-        gPos.initWorldPos().worldToGrid()
-
-        // voxel at intersect
-        let voxel = WorldData.getVoxel(gPos)
-
-        // get uname
-        let username = voxel.isMesh ? voxel.userData.username : voxel.username
-
-        // guest voxel
-        if (!username || username === 'Guest') {
-            GUI.displayString('Guest')
-            return
-        }
-
-        // avoid redundant calls
-        let currentHoveredUser = User.getCurrentHoveredUser()
-        if (currentHoveredUser && username === currentHoveredUser) return
-
-        // remove existing
-        // outlines
-        removeOutlines()
-
-        // set some vars
-        User.setCurrentHoveredUser(username)
-        GUI.displayString(username)
-
-        // get the user voxels
-        let mergedGeo = VoxelUtils.buildOutlineGeom(username)
-
-        // create the merged mesh and add it to the scene
-        let outlineMaterial = new THREE.MeshBasicMaterial({
-            color: GUI.getHighlightColor(),
-            side: THREE.BackSide
-        })
-
-        let mergedMesh = new THREE.Mesh(mergedGeo, outlineMaterial)
-        mergedMesh.name = 'outlineMesh'
-
-        scene.add(mergedMesh)
-        GameScene.render()
-
-    }
-
-    /**
      * Switch between the antialiasing
      * renderer and the non-antialiasing renderer
      * @access public
@@ -513,21 +491,6 @@ let GameScene = function(window, undefined) {
 
     }
 
-    /**
-     * Remove the outlineMesh from the scene
-     * @memberOf GameScene
-     * @access private
-     */
-    function removeOutlines() {
-        User.setCurrentHoveredUser(undefined)
-        for (let i = scene.children.length - 1; i >= 0; i--) {
-            let obj = scene.children[i]
-            if (obj.name === 'outlineMesh') {
-                scene.remove(obj)
-            }
-        }
-    }
-
     /*********** expose public methods *************/
 
     return {
@@ -537,14 +500,12 @@ let GameScene = function(window, undefined) {
         switchRenderer: switchRenderer,
         addToScene: addToScene,
         removeFromScene: removeFromScene,
-        highlightUserVoxels: highlightUserVoxels,
         setDeleteMeshVis: setDeleteMeshVis,
         setGhostMeshVis: setGhostMeshVis,
         setGhostMeshColor: setGhostMeshColor,
         updateGhostMesh: updateGhostMesh,
         updateDeleteMesh: updateDeleteMesh,
         getMapControlsPlane: getMapControlsPlane,
-        removeOutlines: removeOutlines,
         getScene: getScene,
         getCamera: getCamera,
         getPSystem: getPSystem,
