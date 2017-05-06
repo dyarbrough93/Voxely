@@ -36,22 +36,6 @@
     <script src="/js/Main.js"></script>
 
     <style>
-        #info {
-            position: absolute;
-        }
-        .btn-info {
-            margin: 0 3px;
-        }
-
-    </style>
-
-{% endblock %}
-
-{% block body %}
-
-    {% include 'login.nunjucks' %}
-
-    <style>
 
         #modal-background {
             position: absolute;
@@ -64,6 +48,14 @@
 
     </style>
 
+{% endblock %}
+
+{% block body %}
+
+    {% include './components/login.nunjucks' %}
+    {% include './components/modal.nunjucks' %}
+    {% include './components/projects-modal.nunjucks' %}
+
     <div id="modal-background"></div>
 
     <div id="user" hidden>
@@ -72,19 +64,7 @@
         {% endif %}
     </div>
 
-    <div id="info">
-        <a href="https://www.reddit.com/r/pixel_scape/" target="_blank" class="btn btn-default" role="button">Subreddit</a>
-        <a href="https://discordapp.com/channels/301547797134442496/301547797134442496" target="_blank" class="btn btn-primary" role="button">Discord</a>
-        <a id="download-obj" class="btn btn-info" role="button">Download Obj</a>
-        <a id="download-mtl" class="btn btn-info" role="button">Download Mtl</a>
-        <a id="download-json" class="btn btn-info" role="button">Download JSON</a>
-        <a id="show-login" class="btn btn-warning" role="button">Show Login</a>
-        <a id="user-projects" class="btn btn-warning" role="button">Show Projects</a>
-        <a id="new-project" class="btn btn-warning" role="button">New Project</a>
-    </div>
-
-    {% include './modal.nunjucks' %}
-    {% include './projects-modal.nunjucks' %}
+    {% include './components/btn-group.nunjucks' %}
 
     <!-- game container -->
     <div id="container"></div>

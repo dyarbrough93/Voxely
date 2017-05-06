@@ -27,26 +27,3 @@
     <!-- /.modal-dialog -->
 </div>
 <!-- /.modal -->
-
-<script>
-    $('#user-projects').click(function () {
-        SocketHandler.requestProjects(function(err, projects) {
-
-            if (err) console.log(err)
-            else {
-
-                let modalBody = $('#projects-modal .modal-body')
-                $(modalBody).children().remove()
-
-                projects.forEach(function(project) {
-
-                    let p = $('<p>').html(project.name)
-                    modalBody.append(p)
-                    $('#projects-modal').modal()
-                    
-                })
-            }
-
-        })
-    })
-</script>
