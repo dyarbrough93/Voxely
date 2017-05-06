@@ -16,7 +16,7 @@ module.exports = function(passport, nev, devEnv, local) {
 
 	router.get('/login', function(req, res) {
 
-		res.render('login', {
+		res.render('components/login', {
 			dev: devEnv,
 			loginFormData: req.session.loginFormData,
 			signupFormData: req.session.signupFormData,
@@ -34,7 +34,7 @@ module.exports = function(passport, nev, devEnv, local) {
 		req.logout()
 		req.session.loginFormData = null
 		req.session.signupFormData = null
-		res.redirect('/login')
+		res.redirect('/')
 	})
 
 	router.get('/', isAuthenticated, function(req, res) {
@@ -154,7 +154,7 @@ module.exports = function(passport, nev, devEnv, local) {
 
             else {
                 req.flash('message', 'Verification link expired!')
-                res.render('login', {
+                res.render('components/login', {
                     dev: devEnv
                 })
             }
