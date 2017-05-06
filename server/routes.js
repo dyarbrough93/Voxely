@@ -1,6 +1,7 @@
 const config = require('./config.js').server
 const express = require('express')
 const router = express.Router()
+const User = require('./models/User').user
 
 let isAuthenticated = function(req, res, next) {
 
@@ -47,8 +48,36 @@ module.exports = function(passport, nev, devEnv, local) {
 		res.render('editor', {
 			user: req.user,
 			dev: devEnv,
-			admin: admin
+			admin: admin,
+			voxels: JSON.stringify({
+				'x1y2z4': {c: 1234},
+				'x2y1z3': {c: 55463}
+			})
 		})
+	})
+
+	router.get('/:username/:projectname', function(req, res) {
+
+		if (!req.user) return res.redirect('/')
+
+		let pjtName = req.params.projectname
+		let uname = req.user.username
+
+		User.findOne({ username: uname })
+		.populate('projects')
+		.exec(function(err, user) {
+
+			user.projects.forEach(function(project) {
+				if (project.name === pjtName) {
+					console.log(project.voxels)
+					req.session.voxels = project.voxels
+				}
+			})
+
+			res.redirect('/')
+
+		})
+
 	})
 
     router.get('/verify', function(req, res) {

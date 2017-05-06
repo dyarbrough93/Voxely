@@ -18,21 +18,20 @@ var Main = function() {
         // initialize classes
         User.init()
         Mouse.init()
+        Keys.init()
         GUI.init()
         Raycast.init()
         GameScene.init()
         WorldData.init()
-        Keys.init()
         MapControls.init()
         SocketHandler.init()
 
         // download the world data and
         // load it into the scene
-        SocketHandler.retrieveData(function(data) {
+        //SocketHandler.retrieveData(function(data) {
+            WorldData.loadIntoScene( voxelData )
 
-            WorldData.loadIntoScene(data)
-
-        })
+        //})
 
     })
 

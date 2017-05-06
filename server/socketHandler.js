@@ -1,5 +1,6 @@
 const config = require('./config.js').server
 const responses = require('./socketResponses.js')
+const userMgr = require('./userMgr.js')
 
 const actionDelay = {}
 const deleteActionDelay = {}
@@ -110,6 +111,24 @@ function handleBlockOperations(socket) {
             done(deletedVoxels)
 
         })
+
+    })
+
+    socket.on('get projects', function(done) {
+
+        let uname = socket.request.user.username
+        if (!uname || uname === 'Guest') return done('guest')
+
+        userMgr.getProjects(uname, done)
+
+    })
+
+    socket.on('create project', function(pjtName, done) {
+
+        let uname = socket.request.user.username
+        if (!uname || uname === 'Guest') return done('guest')
+
+        userMgr.createProject(uname, pjtName, done)
 
     })
 

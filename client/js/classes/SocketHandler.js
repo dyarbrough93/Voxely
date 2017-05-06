@@ -30,6 +30,18 @@ let SocketHandler = function(window, undefined) {
 
 	}
 
+	function requestProjects(cb) {
+
+		socket.emit('get projects', cb)
+
+	}
+
+	function createProject(name, cb) {
+
+		socket.emit('create project', name, cb)
+
+	}
+
 	/**
 	 * Send a "block removed" socket emit
 	 * with the given grid position
@@ -178,7 +190,9 @@ let SocketHandler = function(window, undefined) {
 		retrieveData: retrieveData,
 		emitBlockAdded: emitBlockAdded,
 		emitBlockRemoved: emitBlockRemoved,
-		getSocket: getSocket
+		getSocket: getSocket,
+		requestProjects: requestProjects,
+		createProject: createProject
 	}
 
 }()

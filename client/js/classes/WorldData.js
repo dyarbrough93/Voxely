@@ -29,7 +29,6 @@ let WorldData = function(window, undefined) {
 	 *------------------------------------*/
 
 	let worldData
-	let userData
 
 	/*------------------------------------*
 	 :: Public Methods
@@ -45,14 +44,7 @@ let WorldData = function(window, undefined) {
 
 		let secPerSide = Config.getGrid().sectionsPerSide
 
-		worldData = []
-		userData = {}
-		for (let i = 0, len1 = secPerSide; i < len1; i++) {
-			worldData[i] = []
-			for (let j = 0, len2 = secPerSide; j < len2; j++) {
-				worldData[i][j] = {}
-			}
-		}
+		worldData = {}
 
 	}
 
