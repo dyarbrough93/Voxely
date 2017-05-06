@@ -1,6 +1,7 @@
 const config = require('./config.js').server
 const express = require('express')
 const router = express.Router()
+const User = require('./models/User').user
 
 let isAuthenticated = function(req, res, next) {
 
@@ -49,6 +50,27 @@ module.exports = function(passport, nev, devEnv, local) {
 			dev: devEnv,
 			admin: admin
 		})
+	})
+
+	router.get('/:username/:projectname', function(req, res) {
+
+		if (!req.user) return res.redirect('/')
+
+		let pjtName = req.params.projectname
+		let uname = req.user.username
+
+		User.findOne({ username: uname })
+		.populate('projects')
+		.exec(function(err, user) {
+
+			user.projects.forEach(function(project) {
+				if (project.name === pjtName) console.log(project)
+			})
+
+			res.redirect('/')
+
+		})
+
 	})
 
     router.get('/verify', function(req, res) {

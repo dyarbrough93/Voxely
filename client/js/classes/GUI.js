@@ -278,8 +278,12 @@ let GUI = function(window, undefined) {
 
 		$(document).trigger('modalClosed')
 
-		$('#welcome-modal').on('hidden.bs.modal', function() {
+		$('.modal').on('hidden.bs.modal', function() {
 			$(document).trigger('modalClosed')
+		})
+
+		$('.modal').on('shown.bs.modal', function() {
+			$(document).trigger('modalOpened')
 		})
 
 		$('#show-login').click(function() {
@@ -364,6 +368,39 @@ let GUI = function(window, undefined) {
 
 			saveAs(jsonBlob, 'voxels.json')
 
+		})
+
+		$('#new-project').click(function() {
+
+			SocketHandler.createProject('Test', function(err) {
+				if (err) console.log(err)
+				else console.log('success')
+			})
+
+		})
+
+		$('#user-projects').click(function () {
+		    SocketHandler.requestProjects(function(err, projects) {
+
+		        if (err) console.log(err)
+		        else {
+
+		            let modalBody = $('#projects-modal .modal-body')
+		            $(modalBody).children().remove()
+
+		            projects.forEach(function(project) {
+
+		                let p = $('<p>').html(project.name)
+						let a = $('<a>', { href: '/' + User.getUName() + '/' + project.name })
+
+						a.append(p)
+		                modalBody.append(a)
+		                $('#projects-modal').modal()
+
+		            })
+		        }
+
+		    })
 		})
 	}
 
