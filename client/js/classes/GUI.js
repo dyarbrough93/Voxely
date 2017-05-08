@@ -71,7 +71,7 @@ let GUI = function(window, undefined) {
 			$(this).blur()
 		})
 
-		initExportButtons()
+		initButtons()
 
 	}
 
@@ -245,10 +245,6 @@ let GUI = function(window, undefined) {
 					GameScene.switchRenderer()
 				}
 			})
-			.addButton('Log Out', function() {
-				let url = window.location.protocol + '//' + window.location.host
-				window.location = url + '/signout'
-			})
 
 		mainPanel.addGroup({
 				label: 'Debug',
@@ -332,7 +328,7 @@ let GUI = function(window, undefined) {
 		})
 	}
 
-	function initExportButtons() {
+	function initButtons() {
 
 		matFilename = 'voxelMats'
 
@@ -376,6 +372,11 @@ let GUI = function(window, undefined) {
 				if (err) console.log(err)
 				else console.log('success')
 			})
+
+		$('#button-logout').click(function() {
+
+			let url = window.location.protocol + '//' + window.location.host
+			window.location = url + '/signout'
 
 		})
 

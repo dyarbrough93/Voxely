@@ -13,4 +13,5 @@
     <a id="show-login" class="btn btn-warning" role="button">Show Login</a>
     <a id="user-projects" class="btn btn-warning" role="button">Show Projects</a>
     <a id="new-project" class="btn btn-warning" role="button">New Project</a>
+    <a id="button-logout" class="btn btn-danger" role="button">Logout</a>
 </div>
