@@ -193,15 +193,12 @@ let GUI = function(window, undefined) {
 	function initControlKit() {
 
 		let mainPanel = controlKit.addPanel({
-			label: ' ',
+			label: 'Controls',
 			align: 'right',
 			width: 275
 		})
 
-		mainPanel.addGroup({
-				label: 'Controls'
-			})
-			.addSubGroup({
+		mainPanel.addSubGroup({
 				label: 'Colors'
 			})
 			.addColor(settings.colors, 'blockColor', {
@@ -217,25 +214,19 @@ let GUI = function(window, undefined) {
 			.addButton('Color Picker', togglePickColor)
 			.addButton('Random Color', settings.colors.randomColor)
 
-		mainPanel.addGroup({
+		mainPanel.addSubGroup({
 				label: 'Info',
 				enable: false
 			})
-			.addStringOutput(settings, 'connectedClients', {
-				label: 'Connections'
-			})
 			.addStringOutput(settings, 'coords', {
 				label: 'Coordinates'
-			})
-			.addStringInput(settings.debug, 'userName', {
-				label: 'Username'
 			})
 			.addButton('Show Controls', function() {
 				$(document).trigger('modalOpened')
 				showModal()
 			})
 
-		mainPanel.addGroup({
+		mainPanel.addSubGroup({
 				label: 'Settings',
 				enable: false
 			})
@@ -244,13 +235,6 @@ let GUI = function(window, undefined) {
 				onChange: function() {
 					GameScene.switchRenderer()
 				}
-			})
-
-		mainPanel.addGroup({
-				label: 'Debug',
-			})
-			.addButton('Log Scene', function() {
-				console.log(GameScene.getScene())
 			})
 
 		// if it was the gui that was clicked,
