@@ -151,8 +151,8 @@ let GameScene = function(window, undefined) {
 
                 Raycast.add(voxelPlane)
 
-                let axisHelper = new THREE.AxisHelper(150)
-                scene.add(axisHelper)
+                //let axisHelper = new THREE.AxisHelper(150)
+                //scene.add(axisHelper)
 
             })()
 

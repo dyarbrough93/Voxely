@@ -57,10 +57,32 @@ let WorldData = function(window, undefined) {
 	 */
 	function loadIntoScene(data) {
 
-		console.log('loading pixels into scene ...')
+		console.log('loading voxels into scene ...')
 
-		let numCubes = countVoxels(data)
-		initVoxels(numCubes, data)
+		;
+		(function initVoxels() {
+
+			data.forEach(function(voxel) {
+
+				if (VoxelUtils.validBlockLocation(voxel.position)) {
+
+					let vPos = voxel.position
+					let gPos = new THREE.Vector3(vPos.x, vPos.y, vPos.z).initGridPos()
+
+					let hColor = voxel.color
+					let tColor = new THREE.Color(hColor)
+
+					/*// vvv black magic, don't touch
+					if (i === 0) console.log(wPos)
+					// ^^^ somehow fixes raycast lag*/
+
+					VoxelActions.createVoxelAtGridPos(gPos, '#' + tColor.getHexString())
+
+				}
+
+			})
+
+		}())
 
 		console.log('done loading voxels')
 
@@ -68,47 +90,25 @@ let WorldData = function(window, undefined) {
 
 	}
 
-	function countVoxels(data) {
+	function getVoxelsArr() {
 
-		let numCubes = 0
+		let voxelsArr = []
 
-		for (let coordStr in data) {
-			if (data.hasOwnProperty(coordStr)) {
-				numCubes++
+		for (let coordStr in worldData) {
+			if (worldData.hasOwnProperty(coordStr)) {
+				let gPos = VoxelUtils.coordStrParse(coordStr)
+				let hColor = worldData[coordStr].material.color.getHex()
+				voxelsArr.push({
+					position: (function() {
+						delete gPos.isGridPos
+						return gPos
+					}()),
+					color: hColor
+				})
 			}
 		}
 
-		return numCubes
-
-	}
-
-	function initVoxels(numCubes, data) {
-
-		let gPos
-		let wPos
-		let currVox
-
-		for (let voxPos in data) {
-
-			gPos = VoxelUtils.coordStrParse(voxPos).initGridPos()
-			wPos = gPos.clone().gridToWorld()
-			currVox = data[voxPos]
-
-			if (VoxelUtils.validBlockLocation(gPos)) {
-
-				let hColor = currVox.c
-				let tColor = new THREE.Color(hColor)
-
-				/*// vvv black magic, don't touch
-				if (i === 0) console.log(wPos)
-				// ^^^ somehow fixes raycast lag*/
-
-				VoxelActions.createVoxelAtGridPos(gPos, '#' + tColor.getHexString())
-
-			}
-
-		}
-
+		return voxelsArr
 	}
 
 	/**
@@ -165,7 +165,8 @@ let WorldData = function(window, undefined) {
 		getVoxel: getVoxel,
 		addMesh: addMesh,
 		getWorldData: getWorldData,
-		removeVoxel: removeVoxel
+		removeVoxel: removeVoxel,
+		getVoxelsArr: getVoxelsArr
 	}
 
 }()

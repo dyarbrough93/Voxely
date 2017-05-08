@@ -6,5 +6,8 @@ module.exports = {
     noExist: 'noExist',
     maxVoxels: 'maxVoxels',
     needDelay: 'needDelay',
-    outOfBounds: 'outOfBounds'
+    outOfBounds: 'outOfBounds',
+    unexpectedErr: 'unexpectedErr',
+    duplicateProj: 'duplicateProj',
+    noProjName: 'noProjName'
 }

@@ -72,23 +72,31 @@ let VoxelActions = function(window, undefined) {
 
         let hexString = GUI.getBlockColor()
 
-        SocketHandler.emitBlockAdded(gPos, hexString, function(response) {
+        if (User.getCurrentProject()) {
 
-            let responses = SocketResponses.get()
+            SocketHandler.emitBlockAdded(gPos, hexString, function(response) {
 
-            if (response === responses.success) {
-                createVoxelAtGridPos(gPos, hexString, User.getUName())
-                return done(true)
-            } else {
-                console.debug(response)
-                if (response === 'max') {
-                    let maxVoxels = Config.getGeneral().maxGlobalBlocks
-                    alert('Maximum voxel limit of ' + maxVoxels + ' reached.')
+                let responses = SocketResponses.get()
+
+                if (response === responses.success) {
+                    createVoxelAtGridPos(gPos, hexString)
+                    return done(true)
+                } else {
+                    //console.debug(response)
+                    if (response === 'max') {
+                        let maxVoxels = Config.getGeneral().maxGlobalBlocks
+                        alert('Maximum voxel limit of ' + maxVoxels + ' reached.')
+                    }
+                    return done(false)
                 }
-                return done(false)
-            }
 
-        })
+            })
+
+        } else {
+            $('#save-project').css('display', 'block')
+            createVoxelAtGridPos(gPos, hexString)
+            return done(true)
+        }
 
     }
 
@@ -109,16 +117,21 @@ let VoxelActions = function(window, undefined) {
             let gPos = VoxelUtils.getGridPositionFromIntersect(intersect)
             if (!gPos) return done(false)
 
-            SocketHandler.emitBlockRemoved(gPos, function(response) {
-                let responses = SocketResponses.get()
-                if (response === responses.success) {
-                    deleteVoxelAtGridPos(gPos)
-                    return done(true)
-                } else { // handle errs
-                    console.debug(response)
-                    return done(false)
-                }
-            })
+            if (User.getCurrentProject()) {
+
+                SocketHandler.emitBlockRemoved(gPos, function(response) {
+                    let responses = SocketResponses.get()
+                    if (response === responses.success) {
+                        deleteVoxelAtGridPos(gPos)
+                        return done(true)
+                    } else { // handle errs
+                        console.debug(response)
+                        return done(false)
+                    }
+                })
+            } else {
+                deleteVoxelAtGridPos(gPos)
+            }
         }
     }
 

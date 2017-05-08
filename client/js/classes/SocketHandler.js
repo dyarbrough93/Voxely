@@ -36,9 +36,17 @@ let SocketHandler = function(window, undefined) {
 
 	}
 
-	function createProject(name, cb) {
+	function createProject(name, voxels, cb) {
 
-		socket.emit('create project', name, cb)
+		socket.emit('create project', name, voxels, cb)
+
+	}
+
+	function saveProject(pjtName, cb) {
+
+		let voxels = WorldData.getWorldData()
+
+		socket.emit('save project', pjtName, cb)
 
 	}
 
@@ -54,11 +62,14 @@ let SocketHandler = function(window, undefined) {
 	 */
 	function emitBlockRemoved(gPos, cb) {
 
+		let project = User.getCurrentProject()
+		let pjtName = project ? project.name : 'guest'
+
 		socket.emit('block removed', {
 			x: gPos.x,
 			y: gPos.y,
 			z: gPos.z
-		}, cb)
+		}, pjtName, cb)
 
 	}
 
@@ -76,6 +87,9 @@ let SocketHandler = function(window, undefined) {
 	 */
 	function emitBlockAdded(gPos, hexString, cb) {
 
+		let project = User.getCurrentProject()
+		let pjtName = project ? project.name : 'guest'
+
 		socket.emit('block added', {
 			color: VoxelUtils.hexStringToDec(hexString),
 			position: {
@@ -83,7 +97,7 @@ let SocketHandler = function(window, undefined) {
 				y: gPos.y,
 				z: gPos.z
 			}
-		}, cb)
+		}, pjtName, cb)
 
 	}
 

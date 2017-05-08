@@ -1,13 +1,10 @@
 {% block head %}
     <style>
-        body {
-            margin: 0;
-            overflow: hidden;
-        }
         #flash_messages {
-            float: left;
+            position: absolute;
             background-color: #ffffff;
             width: 100%;
+            bottom: 0;
             opacity: 0.6;
 
         }
@@ -18,7 +15,6 @@
             font-weight: bold;
             text-align: center;
         }
-        
     </style>
 {% endblock %}
 
@@ -38,12 +34,12 @@
 }%}
     {% endif %}
 
-    <!--<div id="flash_messages">
-        {{ messages()|safe}}
-    </div>-->
+    <div id="flash_messages">
+        {{ messages() | safe }}
+    </div>
 
     <div id="login-modal" class="login-page">
-        <div class="form">
+        <div id="login-forms" class="form">
             <form class="register-form" id="register-form" method="POST" action="/signup">
                 <input maxlength="{{ constraints.lowMaxLength }}" type="text" name="firstName" pattern="[a-zA-Z]+" value="{{ signupFormData.firstName }}" placeholder="first name" required/>
                 <input maxlength="{{ constraints.lowMaxLength }}" type="text" name="lastName" pattern="[a-zA-Z]+" value="{{ signupFormData.lastName }}" placeholder="last name" required/>
@@ -77,6 +73,8 @@
 
         }
 
+        let formOnCreate = false
+
         $('#register-form input').on('invalid', function (e) {
 
             let target = e.target
@@ -92,7 +90,7 @@
         })
 
         function animateForm(speed) {
-            $('form').animate({
+            $('#login-forms form').animate({
                 height: 'toggle',
                 opacity: 'toggle'
             }, speed)
@@ -100,6 +98,7 @@
 
         $('.message a').click(function () {
             animateForm(500)
+            formOnCreate = !formOnCreate
         })
 
         {% if signup %}

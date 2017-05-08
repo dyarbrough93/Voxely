@@ -12,14 +12,10 @@
     <script src="/js/lib/FileSaver.min.js"></script>
     <!-- end libs -->
 
-    <script>
-    let voxelData = {{voxels | safe}}
-    </script>
-
     <!-- game classes -->
-    {% if admin %}
+    {#}{% if admin %}
         <!--<script src="/js/classes/Admin.js"></script>-->
-    {% endif %}
+    {% endif %}#}
     <script src="/js/classes/WorldData.js"></script>
     <script src="/js/classes/SocketHandler.js"></script>
     <script src="/js/classes/Raycast.js"></script>
@@ -56,9 +52,17 @@
 
 {% block body %}
 
+    <script>
+    let njProject
+    {% if project %}
+    njProject = {{ project | safe }}
+    {% endif %}
+    </script>
+
     {% include './components/login.nunjucks' %}
     {% include './components/modal.nunjucks' %}
     {% include './components/projects-modal.nunjucks' %}
+    {% include './components/new-project-modal.nunjucks' %}
 
     <div id="modal-background"></div>
 

@@ -2,7 +2,7 @@
 
 let SocketResponses = function(window, undefined) {
 
-let responses = {"success":"success","dbErr":"dbErr","tooHigh":"tooHigh","alreadyExists":"alreadyExists","noExist":"noExist","maxVoxels":"maxVoxels","needDelay":"needDelay","outOfBounds":"outOfBounds"}
+let responses = {"success":"success","dbErr":"dbErr","tooHigh":"tooHigh","alreadyExists":"alreadyExists","noExist":"noExist","maxVoxels":"maxVoxels","needDelay":"needDelay","outOfBounds":"outOfBounds","unexpectedErr":"unexpectedErr","duplicateProj":"duplicateProj","noProjName":"noProjName"}
 
 function get() {
 return responses

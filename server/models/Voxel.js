@@ -4,11 +4,12 @@ const Schema = mongoose.Schema
 const dev = process.env.NODE_ENV === 'dev' ? 'test' : ''
 
 let dataSchema = new Schema({
-    key: String,
-    data: {
-        c: Number, // color
-        username: String // creator
-    }
-}, {collection: dev + 'worldData'})
+    position: {
+        x: Number,
+        y: Number,
+        z: Number
+    },
+    color: Number
+}, {collection: dev + 'voxels'})
 
 module.exports = mongoose.model('Voxel', dataSchema)

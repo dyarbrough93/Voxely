@@ -1,33 +1,27 @@
 const config = require('./config.js').server
 const express = require('express')
 const router = express.Router()
+const userMgr = require('./userMgr.js')
 const User = require('./models/User').user
-
-let isAuthenticated = function(req, res, next) {
-
-	if (req.isAuthenticated()) {
-		return next()
-    }
-	res.redirect('/guest')
-
-}
+const Project = require('./models/Project')
 
 module.exports = function(passport, nev, devEnv, local) {
 
-	router.get('/login', function(req, res) {
+	router.get('/test', function() {
 
-		res.render('components/login', {
-			dev: devEnv,
-			loginFormData: req.session.loginFormData,
-			signupFormData: req.session.signupFormData,
-			constraints: config.loginForm,
-			signup: req.session.signupFormData || req.query.signup
-		})
+		userMgr.test()
+
 	})
 
-	router.get('/guest', function(req, res) {
-		req.logout()
-		res.render('editor', {guest: true})
+	router.get('/', function(req, res) {
+
+		if (req.isAuthenticated())
+			return res.redirect('/user/' + req.user.username)
+
+		return res.render('editor', {
+			dev: devEnv
+		})
+
 	})
 
 	router.get('/signout', function(req, res) {
@@ -37,50 +31,7 @@ module.exports = function(passport, nev, devEnv, local) {
 		res.redirect('/')
 	})
 
-	router.get('/', isAuthenticated, function(req, res) {
-
-		req.session.loginFormData = {}
-		req.session.signupFormData = null
-
-		const adminUName = local ? local.adminUName : process.env.ADMIN_UNAME
-		const admin = req.user.username === adminUName
-
-		res.render('editor', {
-			user: req.user,
-			dev: devEnv,
-			admin: admin,
-			voxels: JSON.stringify({
-				'x1y2z4': {c: 1234},
-				'x2y1z3': {c: 55463}
-			})
-		})
-	})
-
-	router.get('/:username/:projectname', function(req, res) {
-
-		if (!req.user) return res.redirect('/')
-
-		let pjtName = req.params.projectname
-		let uname = req.user.username
-
-		User.findOne({ username: uname })
-		.populate('projects')
-		.exec(function(err, user) {
-
-			user.projects.forEach(function(project) {
-				if (project.name === pjtName) {
-					console.log(project.voxels)
-					req.session.voxels = project.voxels
-				}
-			})
-
-			res.redirect('/')
-
-		})
-
-	})
-
-    router.get('/verify', function(req, res) {
+	router.get('/verify', function(req, res) {
 
 		const email = req.session.email
 		let baseurl = req.protocol + '://' + req.get('host')
@@ -96,17 +47,16 @@ module.exports = function(passport, nev, devEnv, local) {
 		if (req.query.resend) {
 
 			nev.resendVerificationEmail(email, function(err, userFound) {
-			    if (err) {
+				if (err) {
 					console.log(err)
 					return next(err)
 				}
 
-			    if (userFound) {
+				if (userFound) {
 					return renderView('<p>We\'ve resent the verification email.</p>')
-				}
-			    else {
+				} else {
 					let url = baseurl + '/login'
-					return renderView('<p>Sorry, your email was not found in the database. Please make a new account <a href="' + url +'">here</a>.</p>')
+					return renderView('<p>Sorry, your email was not found in the database. Please make a new account <a href="' + url + '">here</a>.</p>')
 				}
 			})
 
@@ -115,7 +65,7 @@ module.exports = function(passport, nev, devEnv, local) {
 			let url = baseurl + '/verify?resend=true'
 
 			let html = '<p>An email verification has been sent to ' + email + '. Please click the included link to verify your email.</p>'
-			html += '<p>Click <a href="' + url +'">here</a> to resend the verification.</p>'
+			html += '<p>Click <a href="' + url + '">here</a> to resend the verification.</p>'
 
 			return renderView(html)
 
@@ -123,42 +73,103 @@ module.exports = function(passport, nev, devEnv, local) {
 
 	})
 
-    router.get('/verified-redirect', function(req, res) {
+	router.get('/verified-redirect', function(req, res) {
 
-        setTimeout(function() {
+		setTimeout(function() {
 
-            res.render('verified_redirect', {
-    			dev: devEnv
-    		})
+			res.render('verified_redirect', {
+				dev: devEnv
+			})
 
-        }, 5000)
+		}, 5000)
 
 	})
 
-    router.get('/email-verification/:url', function(req, res) {
+	router.get('/email-verification/:url', function(req, res) {
 
-        let url = req.params.url
-        nev.confirmTempUser(url, function(err, user) {
-            if (err) {
-                console.log(err)
-                return next(err)
-            }
+		let url = req.params.url
+		nev.confirmTempUser(url, function(err, user) {
+			if (err) {
+				console.log(err)
+				return next(err)
+			}
 
-            if (user) {
-                console.log(user.username + ' successfully verified')
-                req.logIn(user, function(err) {
-    				if (err) return next(err)
-    				return res.redirect('/verified-redirect')
-    			})
-            }
+			if (user) {
+				console.log(user.username + ' successfully verified')
+				req.logIn(user, function(err) {
+					if (err) return next(err)
+					return res.redirect('/verified-redirect')
+				})
+			} else {
+				req.flash('message', 'Verification link expired!')
+				res.render('components/login', {
+					dev: devEnv
+				})
+			}
+		})
+	})
 
-            else {
-                req.flash('message', 'Verification link expired!')
-                res.render('components/login', {
-                    dev: devEnv
-                })
-            }
-        })
+	router.get('/user/:username', function(req, res) {
+
+		if (!req.user || req.user.username !== req.params.username) return res.redirect('/')
+
+		// clear form data
+		req.session.loginFormData = {}
+		req.session.signupFormData = null
+
+		const adminUName = devEnv ? local.adminUName : process.env.ADMIN_UNAME
+		const admin = req.user.username === adminUName
+
+		return res.render('editor', {
+			user: req.user,
+			dev: devEnv
+		})
+
+	})
+
+	router.get('/user/:username/:projectname', function(req, res) {
+
+		if (!req.user || req.user.username !== req.params.username) return res.redirect('/')
+
+		let pjtName = req.params.projectname
+		let uname = req.user.username
+
+		let userCache = userMgr.getUserCache(uname)
+		if (userCache) {
+			let projects = userCache.projects
+			for (let i = 0; i < projects.length; i++) {
+				let project = projects[i]
+				if (project.name === pjtName) {
+					return res.render('editor', {
+						user: req.user,
+						dev: devEnv,
+						project: JSON.stringify(project)
+					})
+				}
+			}
+			// project not found
+			return res.redirect('/user/' + uname)
+		} else {
+			console.log('user cache for ' + uname + ' not found')
+			res.redirect('/')
+		}
+	})
+
+	router.get('/user/:username/delete/:projectname', function(req, res) {
+
+		if (!req.user || req.user.username !== req.params.username) return res.redirect('/')
+
+		let pjtName = req.params.projectname
+		let uname = req.user.username
+
+		userMgr.deleteProject(uname, pjtName, function(err) {
+
+			if (err) console.log(err)
+
+			return res.redirect('/')
+
+		})
+
 	})
 
 	router.post('/login', function(req, res, next) {
@@ -172,7 +183,7 @@ module.exports = function(passport, nev, devEnv, local) {
 
 		passport.authenticate('login', {
 			successRedirect: '/',
-			failureRedirect: '/login',
+			failureRedirect: '/',
 			failureFlash: true
 		})(req, res, next)
 
@@ -190,9 +201,9 @@ module.exports = function(passport, nev, devEnv, local) {
 		passport.authenticate('signup', function(err, user, info) {
 
 			if (err) return next(err)
-			if (!user) return res.redirect('/login')
+			if (!user) return res.redirect('/')
 
-            req.session.email = user.email
+			req.session.email = user.email
 			req.logIn(user, function(err) {
 				if (err) return next(err)
 				return res.redirect('/verify')

@@ -1,17 +1,30 @@
 <style>
-    #btn-group {
+    .btn-group {
         position: absolute;
+    }
+    #btn-links {
+        left: 50%;
+        transform: translate(-50%, 0);
     }
 </style>
 
-<div id="btn-group" class="btn-group-vertical">
+<div id="btn-links" class="btn-group">
     <a href="https://www.reddit.com/r/pixel_scape/" target="_blank" class="btn btn-default" role="button">Subreddit</a>
     <a href="https://discordapp.com/channels/301547797134442496/301547797134442496" target="_blank" class="btn btn-primary" role="button">Discord</a>
+</div>
+
+<div id="btn-group" class="btn-group-vertical btn-group">
     <a id="download-obj" class="btn btn-info" role="button">Download Obj</a>
     <a id="download-mtl" class="btn btn-info" role="button">Download Mtl</a>
     <a id="download-json" class="btn btn-info" role="button">Download JSON</a>
-    <a id="show-login" class="btn btn-warning" role="button">Show Login</a>
-    <a id="user-projects" class="btn btn-warning" role="button">Show Projects</a>
-    <a id="new-project" class="btn btn-warning" role="button">New Project</a>
+    {% if user %}
+    <a id="user-projects" class="btn btn-warning" role="button">Projects</a>
+    <a class="btn btn-warning new-project" role="button">New Project</a>
+    {% endif %}
+    <a id="save-project" class="btn btn-success" role="button" style="display: none;">Save Project</a>
+    {% if user %}
     <a id="button-logout" class="btn btn-danger" role="button">Logout</a>
+    {% else %}
+    <a id="button-login" class="btn btn-success" role="button">Login</a>
+    {% endif %}
 </div>

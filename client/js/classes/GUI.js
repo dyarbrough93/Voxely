@@ -268,6 +268,52 @@ let GUI = function(window, undefined) {
 
 	}
 
+	function showLogin(animSpeed) {
+
+		$(document).trigger('modalOpened')
+
+		$('#login-modal').css('z-index', 3)
+		$('#modal-background').css('z-index', 2)
+
+		$('#login-modal').animate({
+			opacity: 1
+		}, {
+			queue: false
+		}, animSpeed)
+
+		$('#modal-background').animate({
+			opacity: 0.5
+		}, {
+			queue: false
+		}, animSpeed)
+
+	}
+
+	function hideLogin(animSpeed) {
+
+		$('#login-modal').animate({
+			opacity: 0
+		}, {
+			queue: false,
+			duration: animSpeed,
+			done: function() {
+				$('#login-modal').css('z-index', -1)
+			}
+		})
+
+		$('#modal-background').animate({
+			opacity: 0
+		}, {
+			queue: false,
+			duration: animSpeed,
+			done: function() {
+				$('#modal-background').css('z-index', -1)
+				$(document).trigger('modalClosed')
+			}
+		})
+
+	}
+
 	function initModals() {
 
 		let animSpeed = 185
@@ -282,49 +328,16 @@ let GUI = function(window, undefined) {
 			$(document).trigger('modalOpened')
 		})
 
-		$('#show-login').click(function() {
-
-			$(document).trigger('modalOpened')
-
-			$('#login-modal').css('z-index', 2)
-			$('#modal-background').css('z-index', 1)
-
-			$('#login-modal').animate({
-				opacity: 1
-			}, {
-				queue: false
-			}, animSpeed)
-
-			$('#modal-background').animate({
-				opacity: 0.5
-			}, {
-				queue: false
-			}, animSpeed)
-
+		$('#button-login').click(function() {
+			showLogin(animSpeed)
+			if (formOnCreate) {
+				animateForm(0)
+				formOnCreate = false
+			}
 		})
 
 		$('#modal-background').click(function() {
-
-			$('#login-modal').animate({
-				opacity: 0
-			}, {
-				queue: false,
-				duration: animSpeed,
-				done: function() {
-					$('#login-modal').css('z-index', -1)
-				}
-			})
-
-			$('#modal-background').animate({
-				opacity: 0
-			}, {
-				queue: false,
-				duration: animSpeed,
-				done: function() {
-					$('#modal-background').css('z-index', -1)
-					$(document).trigger('modalClosed')
-				}
-			})
+			hideLogin(animSpeed)
 		})
 	}
 
@@ -366,17 +379,35 @@ let GUI = function(window, undefined) {
 
 		})
 
-		$('#new-project').click(function() {
+		$('.new-project').click(function() {
 
-			SocketHandler.createProject('Test', function(err) {
-				if (err) console.log(err)
-				else console.log('success')
-			})
+			$('#new-project-modal').modal()
+
+		})
 
 		$('#button-logout').click(function() {
 
 			let url = window.location.protocol + '//' + window.location.host
 			window.location = url + '/signout'
+
+		})
+
+		let fromBlankProj = false
+		$('#save-project').click(function() {
+
+			fromBlankProj = true
+			if (User.getUName() === 'Guest') {
+
+				showLogin()
+
+				if (!formOnCreate) {
+					formOnCreate = true
+					animateForm(0)
+				}
+			}
+			else {
+				$('#new-project-modal').modal()
+			}
 
 		})
 
@@ -387,15 +418,34 @@ let GUI = function(window, undefined) {
 
 			let pjtName = $('#new-project-modal #new-project-name').val()
 			let uname = User.getUName()
+			let voxels = []
+			if (fromBlankProj) {
+				fromBlankProj = false
+				voxels = WorldData.getVoxelsArr()
+			}
 
 			if (uname && uname !== 'Guest') {
-				SocketHandler.createProject(pjtName, function(err) {
+
+				SocketHandler.createProject(pjtName, voxels, function(err) {
 					let url = window.location.protocol +  '//' + window.location.host
 					if (err) {
+
 						console.log(err)
-						alert('Error: Project not created. Please try again.')
-						window.location = url + '/user/' + uname
+
+						let msg
+						let responses = SocketResponses.get()
+						if (err === responses.unexpectedErr)
+							msg = 'Unexpected error.'
+						else if (err === responses.noProjName)
+							msg = 'You must specify a project name.'
+						else if (err === responses.duplicateProj)
+							msg = 'A project with that name already exists.'
+						else
+							msg = 'Unknown.'
+
+						alert('Error: Project not created. ' + msg)
 					}
+					else {
 						console.log('Created project ' + pjtName)
 						window.location = url + '/user/' + uname + '/' + pjtName
 					}
@@ -406,26 +456,39 @@ let GUI = function(window, undefined) {
 			}
 		})
 
+		$('.delete-proj').click(function() {
+			confirm('ta')
+			console.log('elete')
+		})
+
 		$('#user-projects').click(function () {
 		    SocketHandler.requestProjects(function(projects) {
 
-		        else {
+	            let modalBody = $('#projects-modal .modal-body')
+	            $(modalBody).children().remove()
 
-		            let modalBody = $('#projects-modal .modal-body')
-		            $(modalBody).children().remove()
+				let len = projects.length
+				let i = 0
+	            projects.forEach(function(project) {
 
-		            projects.forEach(function(project) {
+	                let h5 = $('<h5>').html(project.name)
+					let open = $('<a>', { href: '/user/' + User.getUName() + '/' + project.name }).html('Open')
+					let del = $('<a>', { href: '/user/' + User.getUName() + '/delete/' + project.name, class: 'delete-proj' }).html('Delete')
+					let hr = $('<hr>')
 
-		                let p = $('<p>').html(project.name)
-						let a = $('<a>', { href: '/' + User.getUName() + '/' + project.name })
+					modalBody.append(h5)
+					modalBody.append(open)
+					modalBody.append(' | ')
+					modalBody.append(del)
+					if (i < len - 1)
+						modalBody.append(hr)
 
-						a.append(p)
-		                modalBody.append(a)
+					i++
 
-		            })
-					
-					$('#projects-modal').modal()
-		        }
+	            })
+
+				$('#projects-modal').modal()
+
 		    })
 		})
 	}

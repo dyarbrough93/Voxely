@@ -15,6 +15,7 @@ let User = function(window, undefined) {
     let actionTimer
     let currentHoveredUser
     let actionDelay
+    let currentProject
 
     /*------------------------------------*
      :: Public Methods
@@ -36,6 +37,9 @@ let User = function(window, undefined) {
         setDefaultState()
 
         actionDelay = Config.getGeneral().actionDelay
+
+        // from editor.nunjucks
+        currentProject = njProject
 
         let now = Date.now()
         actionTimer = new Date(now - actionDelay)
@@ -93,6 +97,10 @@ let User = function(window, undefined) {
 
     /*********** getters *************/
 
+    function getCurrentProject() {
+        return currentProject
+    }
+
     /**
      * Is the user state pick?
      * @memberOf UserState
@@ -136,7 +144,8 @@ let User = function(window, undefined) {
         setPickState: setPickState,
         getCurrentHoveredUser: getCurrentHoveredUser,
         setCurrentHoveredUser: setCurrentHoveredUser,
-        getActionDelay: getActionDelay
+        getActionDelay: getActionDelay,
+        getCurrentProject: getCurrentProject
     }
 
 }(window)

@@ -3,100 +3,62 @@ const responses = require('./socketResponses.js')
 const userMgr = require('./userMgr.js')
 
 const actionDelay = {}
-const deleteActionDelay = {}
 const connectedUsers = {}
 
 let worldData
 
 let i = 0
-function enoughTimePassed(socket, deleteOther) {
+
+function enoughTimePassed(socket) {
 
     const uname = socket.request.user.username
     const actDelayKey = uname ? uname : socket.id // guest
     const delay = (function() {
-        if (uname) {
-            if (deleteOther) return config.deleteOtherDelay
-            return config.actionDelay
-        } else {
-            if (deleteOther) return config.guestDeleteOtherDelay
-            return config.guestActionDelay
-        }
+        return config.actionDelay
     })()
 
-    const delayObj = deleteOther ? deleteActionDelay : actionDelay
-
-	// only allow add if user hasn't
-	// added for delayObj
-	if (delayObj[actDelayKey]) {
-		let msPassed = (new Date() - delayObj[actDelayKey])
-		if (msPassed < delay) return false
-		delayObj[actDelayKey] = new Date()
-		return true
-	} else {
-		delayObj[actDelayKey] = new Date()
-		return true
-	}
+    // only allow add if user hasn't
+    // added for delayObj
+    if (actionDelay[actDelayKey]) {
+        let msPassed = (new Date() - actionDelay[actDelayKey])
+        if (msPassed < delay) return false
+        actionDelay[actDelayKey] = new Date()
+        return true
+    } else {
+        actionDelay[actDelayKey] = new Date()
+        return true
+    }
 
 }
 
-function handleBlockOperations(socket) {
+function handleBlockOperations(socket, io) {
 
     // handle block add
-    socket.on('block added', function(block, callback) {
+    socket.on('block added', function(block, pjtName, callback) {
 
         if (!enoughTimePassed(socket)) return callback(responses.needDelay)
 
-		let uname = socket.request.user.username
-		if (!uname) uname = 'Guest'
+        let uname = socket.request.user.username
 
         // try to add the block
-        worldData.add(block, uname, function(response) {
-
-            // success
-            if (response === responses.success) {
-
-                // tell everyone
-                // a block was added
-                socket.broadcast.emit('block added', block)
-
-            }
-
-            return callback(response)
-
-        })
+        let res = userMgr.addBlockToProj(block, uname, pjtName)
+        if (res) return callback(responses.success)
+        return callback(res)
 
     })
 
     // handle block remove
-    socket.on('block removed', function(position, callback) {
+    socket.on('block removed', function(gPos, pjtName, callback) {
 
-		let uname = socket.request.user.username
-		if (!uname) uname = 'Guest'
+        if (!enoughTimePassed(socket)) return callback(responses.needDelay)
 
-		let voxel = worldData.getVoxel(position)
+        let uname = socket.request.user.username
+        if (!uname) uname = 'Guest'
 
-		let voxelUName = voxel && voxel.username ? voxel.username : 'Guest'
-
-        if (voxel && voxelUName !== 'Guest' && voxelUName !== uname) {
-            if (!enoughTimePassed(socket, true)) return callback(responses.needDelay)
-        } else {
-            if (!enoughTimePassed(socket)) return callback(responses.needDelay)
-        }
-
-        // try to remove block
-        worldData.remove(position, uname, function(response) {
-
-            if (response === responses.success) {
-
-                // tell all
-                // clients a block was removed
-                socket.broadcast.emit('block removed', position)
-
-            }
-
-            return callback(response)
-
-        })
+        // try to remove the block
+        let res = userMgr.removeBlockFromProj(gPos, uname, pjtName)
+        if (res) return callback(responses.success)
+        return callback
 
     })
 
@@ -119,16 +81,18 @@ function handleBlockOperations(socket) {
         let uname = socket.request.user.username
         if (!uname || uname === 'Guest') return done('guest')
 
-        userMgr.getProjects(uname, done)
+        let userCache = userMgr.getUserCache(uname)
+        if (userCache) return done(userCache.projects)
+        return done([])
 
     })
 
-    socket.on('create project', function(pjtName, done) {
+    socket.on('create project', function(pjtName, voxels, done) {
 
         let uname = socket.request.user.username
         if (!uname || uname === 'Guest') return done('guest')
 
-        userMgr.createProject(uname, pjtName, done)
+        userMgr.createProject(uname, pjtName, voxels, done)
 
     })
 
@@ -202,44 +166,30 @@ function IOHandler(io, _worldData) {
     io.on('connection', function(socket) {
 
         // disconnect when too many users
-        if (io.engine.clientsCount > config.maxClients) {
+        /*if (io.engine.clientsCount > config.maxClients) {
             socket.emit('max clients')
             socket.disconnect()
             return
-        }
+        }*/
 
-        // prevent multiple logins per user
-        const uname = socket.request.user.username
-
-        /*if (uname) {
-
-            if (connectedUsers[uname]) {
-                socket.emit('multiple logins')
-                socket.disconnect()
-            }
-            connectedUsers[uname] = true
-
-        } // else guest*/
-
-        console.log('connection')
         console.log('connections: ' + io.engine.clientsCount)
 
-        // tell the clients there is a new connection
-        io.sockets.emit('update clients', io.engine.clientsCount)
+        let uname = socket.request.user.username
 
-        handleBlockOperations(socket)
+        if (uname) {
+            userMgr.cacheUser(uname, socket.id, function(err) {
+                if (err) console.log(err)
+            })
+        }
 
+        handleBlockOperations(socket, io)
         handleChunking(socket)
 
         // client disconnected
         socket.on('disconnect', function() {
 
-            connectedUsers[uname] = false
-            delete connectedUsers[uname]
+            //userMgr.removeUserCache(uname)
 
-            // tell all the clients a client disconnected
-            io.sockets.emit('update clients', io.engine.clientsCount)
-            console.log('user disconnected')
             console.log('connections: ' + io.engine.clientsCount)
 
         })
