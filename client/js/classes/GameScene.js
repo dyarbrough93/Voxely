@@ -239,7 +239,7 @@ let GameScene = function(window, undefined) {
 
                 let size = gridConfig.blockSize + (gridConfig.blockSize * 0.02)
 
-                let redXTexture = new THREE.ImageUtils.loadTexture('img/redx.png')
+                let redXTexture = new THREE.ImageUtils.loadTexture('/img/redx.png')
 
                 let deleteGeo = new THREE.CubeGeometry(size, size, size)
                 let deleteMat = new THREE.MeshPhongMaterial({
