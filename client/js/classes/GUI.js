@@ -380,10 +380,35 @@ let GUI = function(window, undefined) {
 
 		})
 
-		$('#user-projects').click(function () {
-		    SocketHandler.requestProjects(function(err, projects) {
+		$('#new-project-form').submit(function(e) {
 
-		        if (err) console.log(err)
+			e.preventDefault()
+			$('#new-project-modal').modal('hide')
+
+			let pjtName = $('#new-project-modal #new-project-name').val()
+			let uname = User.getUName()
+
+			if (uname && uname !== 'Guest') {
+				SocketHandler.createProject(pjtName, function(err) {
+					let url = window.location.protocol +  '//' + window.location.host
+					if (err) {
+						console.log(err)
+						alert('Error: Project not created. Please try again.')
+						window.location = url + '/user/' + uname
+					}
+						console.log('Created project ' + pjtName)
+						window.location = url + '/user/' + uname + '/' + pjtName
+					}
+
+				})
+			} else {
+				console.log('Guests should be able to create new projects..??')
+			}
+		})
+
+		$('#user-projects').click(function () {
+		    SocketHandler.requestProjects(function(projects) {
+
 		        else {
 
 		            let modalBody = $('#projects-modal .modal-body')
