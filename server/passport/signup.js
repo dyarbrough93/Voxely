@@ -1,9 +1,9 @@
 const formConfig = require('../config.js').server.loginForm
 const LocalStrategy = require('passport-local').Strategy
 const bCrypt = require('bcrypt-nodejs')
-const User = require('../models/User.js').user
+const User = require('../models/User')
 
-module.exports = function(passport, nev) {
+module.exports = function(passport) {
 
 	passport.use('signup', new LocalStrategy({
 			passReqToCallback: true // allows us to pass back the entire request to the callback
@@ -28,7 +28,8 @@ module.exports = function(passport, nev) {
 						console.log('User already exists with username: ' + username)
 						return done(null, false, req.flash('message', 'User Already Exists'))
 					} else {
-						// if there is no user with that email
+
+						// if there is no user with that uname
 						// create the user
 						let newUser = new User({
                             username: username,
@@ -39,39 +40,9 @@ module.exports = function(passport, nev) {
 							projects: []
                         })
 
-						nev.createTempUser(newUser, function(err, existingPersistentUser, newTempUser) {
-
-							if (err) {
-								console.log(err)
-								if (err.code === 11000)
-									return done(null, false, req.flash('message', 'This username exists, but has not been verified. If this is your account, please check your email you registered it with for the verification link.'))
-								else
-									return done(err, false, req.flash('message', 'Unknown error. Try a different username / email.'))
-							}
-
-							// user already exists in persistent collection...
-							if (existingPersistentUser) {
-								console.log('user already exists')
-								return done(null, false, req.flash('message', 'There is already an account with this email.'))
-							}
-
-							// a new user
-							if (newTempUser) {
-								let URL = newTempUser[nev.options.URLFieldName]
-								nev.sendVerificationEmail(newTempUser.email, URL, function(err, info) {
-									if (err) {
-										console.log(err)
-										return done(null, false)
-									}
-									console.log('Email sent to ' + newUser.email)
-                                    return done(null, newUser)
-								})
-
-							// user already exists in temporary collection...
-							} else {
-								console.log('Already signed up!')
-								return done(null, false, req.flash('message', 'Already registered! Please check your email for a verification code.'))
-							}
+						newUser.save(function(err) {
+							if (err) return done(err, false, req.flash('message', 'Could not save user to database.00'))
+							return done(null, newUser)
 						})
 					}
 				})

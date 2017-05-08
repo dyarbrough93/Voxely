@@ -2,10 +2,10 @@ const config = require('./config.js').server
 const express = require('express')
 const router = express.Router()
 const userMgr = require('./userMgr.js')
-const User = require('./models/User').user
+const User = require('./models/User')
 const Project = require('./models/Project')
 
-module.exports = function(passport, nev, devEnv, local) {
+module.exports = function(passport, devEnv, local) {
 
 	router.get('/test', function() {
 
@@ -29,84 +29,6 @@ module.exports = function(passport, nev, devEnv, local) {
 		req.session.loginFormData = null
 		req.session.signupFormData = null
 		res.redirect('/')
-	})
-
-	router.get('/verify', function(req, res) {
-
-		const email = req.session.email
-		let baseurl = req.protocol + '://' + req.get('host')
-
-		function renderView(html) {
-			res.render('verify', {
-				email: email,
-				dev: devEnv,
-				html: html
-			})
-		}
-
-		if (req.query.resend) {
-
-			nev.resendVerificationEmail(email, function(err, userFound) {
-				if (err) {
-					console.log(err)
-					return next(err)
-				}
-
-				if (userFound) {
-					return renderView('<p>We\'ve resent the verification email.</p>')
-				} else {
-					let url = baseurl + '/login'
-					return renderView('<p>Sorry, your email was not found in the database. Please make a new account <a href="' + url + '">here</a>.</p>')
-				}
-			})
-
-		} else {
-
-			let url = baseurl + '/verify?resend=true'
-
-			let html = '<p>An email verification has been sent to ' + email + '. Please click the included link to verify your email.</p>'
-			html += '<p>Click <a href="' + url + '">here</a> to resend the verification.</p>'
-
-			return renderView(html)
-
-		}
-
-	})
-
-	router.get('/verified-redirect', function(req, res) {
-
-		setTimeout(function() {
-
-			res.render('verified_redirect', {
-				dev: devEnv
-			})
-
-		}, 5000)
-
-	})
-
-	router.get('/email-verification/:url', function(req, res) {
-
-		let url = req.params.url
-		nev.confirmTempUser(url, function(err, user) {
-			if (err) {
-				console.log(err)
-				return next(err)
-			}
-
-			if (user) {
-				console.log(user.username + ' successfully verified')
-				req.logIn(user, function(err) {
-					if (err) return next(err)
-					return res.redirect('/verified-redirect')
-				})
-			} else {
-				req.flash('message', 'Verification link expired!')
-				res.render('components/login', {
-					dev: devEnv
-				})
-			}
-		})
 	})
 
 	router.get('/user/:username', function(req, res) {
@@ -206,7 +128,7 @@ module.exports = function(passport, nev, devEnv, local) {
 			req.session.email = user.email
 			req.logIn(user, function(err) {
 				if (err) return next(err)
-				return res.redirect('/verify')
+				return res.redirect('/') // @TODO: save voxels
 			})
 
 		})(req, res, next)

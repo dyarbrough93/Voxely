@@ -1,5 +1,5 @@
 const Project = require('./models/Project')
-const User = require('./models/User').user
+const User = require('./models/User')
 const Voxel = require('./models/Voxel')
 const responses = require('./socketResponses.js')
 
@@ -8,9 +8,6 @@ let users = {}
 module.exports = {
 
 	test: function() {
-
-
-
 	},
 
 	isConnected: function(uname) {
@@ -223,8 +220,6 @@ module.exports = {
 				}
 
 			}
-
-			console.log(project)
 
 			project.save(function(err) {
 
