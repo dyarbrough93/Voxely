@@ -222,7 +222,7 @@ let GameScene = function(window, undefined) {
                 let ghostGeo = new THREE.CubeGeometry(blockSize, blockSize, blockSize)
 
                 let ghostMaterial = new THREE.MeshBasicMaterial({
-                    color: GUI.getBlockColor(),
+                    color: GUIControlKit.getBlockColor(),
                     transparent: true,
                     opacity: 0.5,
                     visible: false

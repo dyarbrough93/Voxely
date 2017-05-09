@@ -70,7 +70,7 @@ let VoxelActions = function(window, undefined) {
         gPos.initWorldPos()
         gPos.worldToGrid()
 
-        let hexString = GUI.getBlockColor()
+        let hexString = GUIControlKit.getBlockColor()
 
         if (User.getCurrentProject()) {
 

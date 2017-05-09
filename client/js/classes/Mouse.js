@@ -66,8 +66,8 @@ let Mouse = function(window, undefined) {
 	 */
 	function mouseDown(e) {
 
-		if (GUI.wasClicked()) {
-			GUI.setClicked(false)
+		if (GUIControlKit.wasClicked()) {
+			GUIControlKit.setClicked(false)
 			return
 		}
 		if (e.which === 1) leftDown(e)
@@ -97,7 +97,7 @@ let Mouse = function(window, undefined) {
 				User.resetActionTimer()
 
 				if (User.stateIsPick())
-					GUI.setPickColor(intersect)
+					GUIControlKit.setPickColor(intersect)
 				else { // create or delete
 
 					if (Keys.isShiftDown()) { // delete voxel
@@ -140,7 +140,7 @@ let Mouse = function(window, undefined) {
 
 		if (intersect) { // only act if we intersected something
 
-			GUI.setCoords(intersects.planeIntx)
+			GUIControlKit.setCoords(intersects.planeIntx)
 
 			if (User.stateIsDefault()) {
 				GameScene.updateGhostMesh(intersect)

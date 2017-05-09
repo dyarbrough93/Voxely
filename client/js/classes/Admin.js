@@ -50,16 +50,16 @@ let AdminGUI = function(window, undefined) {
             username: ''
         }
 
-        controlKit = GUI.getControlKit()
+        controlKit = GUIControlKit.getControlKit()
         initControlKit()
 
         // don't know why we need this
         $('#controlKit .panel').mousedown(function() {
-            GUI.setClicked(true)
+            GUIControlKit.setClicked(true)
             // this has to be assigned here because
             // some elements don't exist on page load
             $('#controlKit *').mousedown(function() {
-                GUI.setClicked(true)
+                GUIControlKit.setClicked(true)
             })
 
         })
@@ -132,7 +132,7 @@ let AdminGUI = function(window, undefined) {
                 let p = intersect.point.clone().initWorldPos()
                 p.add(intersect.face.normal).worldToGrid()
 
-                let spssp = ((GUI.getSSSP() - 1) / 2)
+                let spssp = ((GUIControlKit.getSSSP() - 1) / 2)
                 let c1 = new THREE.Vector3(p.x - spssp, p.y, p.z - spssp).initGridPos()
                 let c2 = new THREE.Vector3(p.x + spssp, p.y, p.z + spssp).initGridPos()
 
@@ -157,7 +157,7 @@ let AdminGUI = function(window, undefined) {
                                 gPos.x <= c2.x && gPos.z <= c2.z) {
 
                                 if (deletingRegionWithColor) {
-                                    if (WorldData.getVoxel(gPos).hColor !== VoxelUtils.hexStringToDec(GUI.getBlockColor()))
+                                    if (WorldData.getVoxel(gPos).hColor !== VoxelUtils.hexStringToDec(GUIControlKit.getBlockColor()))
                                         continue
                                 }
 

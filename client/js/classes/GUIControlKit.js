@@ -2,9 +2,9 @@
 
 /**
  * Manages the game's dat.GUI
- * @namespace GUI
+ * @namespace GUIControlKit
  */
-let GUI = function(window, undefined) {
+let GUIControlKit = function(window, undefined) {
 
 	/*------------------------------------*
 	 :: Class Variables
@@ -14,10 +14,6 @@ let GUI = function(window, undefined) {
 	let controlKit
 	let guiClicked
 
-	// export
-	let exported
-	let matFilename
-
 	/*------------------------------------*
 	 :: Public Methods
 	 *------------------------------------*/
@@ -25,7 +21,7 @@ let GUI = function(window, undefined) {
 	/**
 	 * Initializes the module. Must be called
 	 * before anything else
-	 * @memberOf GUI
+	 * @memberOf GUIControlKit
 	 * @access public
 	 */
 	function init() {
@@ -65,13 +61,6 @@ let GUI = function(window, undefined) {
 		guiClicked = false
 
 		initControlKit()
-		initModals()
-
-		$(".btn").mouseup(function() {
-			$(this).blur()
-		})
-
-		initButtons()
 
 	}
 
@@ -79,7 +68,7 @@ let GUI = function(window, undefined) {
 	 * Given an intersect, extract the color of the intersected
 	 * block (if it was a block that was intersected) and assign it
 	 * to the blockColor + update the Game scenes ghost mesh
-	 * @memberOf GUI
+	 * @memberOf GUIControlKit
 	 * @access public
 	 * @param {THREE.Intersect} intersect The intersect
 	 */
@@ -123,7 +112,7 @@ let GUI = function(window, undefined) {
 
 	/**
 	 * Get the current block color
-	 * @memberOf GUI
+	 * @memberOf GUIControlKit
 	 * @access public
 	 * @return {number} The block color
 	 */
@@ -134,7 +123,7 @@ let GUI = function(window, undefined) {
 	/**
 	 * Return whether or not the GUI was click
 	 * before the mouse click event was received
-	 * @memberOf GUI
+	 * @memberOf GUIControlKit
 	 * @access public
 	 * @return {number} The block color
 	 */
@@ -144,7 +133,7 @@ let GUI = function(window, undefined) {
 
 	/**
 	 * Set clicked to true or false
-	 * @memberOf GUI
+	 * @memberOf GUIControlKit
 	 * @access public
 	 * @param clicked What to set it to
 	 */
@@ -174,20 +163,9 @@ let GUI = function(window, undefined) {
 		$('#welcome-modal').modal()
 	}
 
-	/*------------------------------------*
-	 :: Private Methods
-	 *------------------------------------*/
-
-	function exportVoxels() {
-
-		var exporter = new THREE.OBJExporter()
-		exported = exporter.parse(GameScene.getScene(), matFilename)
-
-	}
-
 	/**
 	 * Add the necessary elements to the gui
-	 * @memberOf GUI
+	 * @memberOf GUIControlKit
 	 * @access private
 	 */
 	function initControlKit() {
@@ -252,235 +230,10 @@ let GUI = function(window, undefined) {
 
 	}
 
-	function showLogin(animSpeed) {
-
-		$(document).trigger('modalOpened')
-
-		$('#login-modal').css('z-index', 3)
-		$('#modal-background').css('z-index', 2)
-
-		$('#login-modal').animate({
-			opacity: 1
-		}, {
-			queue: false
-		}, animSpeed)
-
-		$('#modal-background').animate({
-			opacity: 0.5
-		}, {
-			queue: false
-		}, animSpeed)
-
-	}
-
-	function hideLogin(animSpeed) {
-
-		$('#login-modal').animate({
-			opacity: 0
-		}, {
-			queue: false,
-			duration: animSpeed,
-			done: function() {
-				$('#login-modal').css('z-index', -1)
-			}
-		})
-
-		$('#modal-background').animate({
-			opacity: 0
-		}, {
-			queue: false,
-			duration: animSpeed,
-			done: function() {
-				$('#modal-background').css('z-index', -1)
-				$(document).trigger('modalClosed')
-			}
-		})
-
-	}
-
-	function initModals() {
-
-		let animSpeed = 185
-
-		$(document).trigger('modalClosed')
-
-		$('.modal').on('hidden.bs.modal', function() {
-			$(document).trigger('modalClosed')
-		})
-
-		$('.modal').on('shown.bs.modal', function() {
-			$(document).trigger('modalOpened')
-		})
-
-		$('#button-login').click(function() {
-			showLogin(animSpeed)
-			if (formOnCreate) {
-				animateForm(0)
-				formOnCreate = false
-			}
-		})
-
-		$('#modal-background').click(function() {
-			hideLogin(animSpeed)
-		})
-	}
-
-	function initButtons() {
-
-		matFilename = 'voxelMats'
-
-		$('#download-obj').click(function() {
-
-			exportVoxels()
-
-			let objBlob = new Blob([exported.obj], {
-				type: 'text/plain'
-			})
-
-			saveAs(objBlob, 'voxels.obj')
-
-		})
-
-		$('#download-mtl').click(function() {
-
-			exportVoxels()
-
-			let mtlBlob = new Blob([exported.mtl], {
-				type: 'text/plain'
-			})
-
-			saveAs(mtlBlob, matFilename + '.mtl')
-
-		})
-
-		$('#download-json').click(function() {
-
-			let jsonBlob = new Blob([JSON.stringify(GameScene.getScene())], {
-				type: 'text/json'
-			})
-
-			saveAs(jsonBlob, 'voxels.json')
-
-		})
-
-		$('.new-project').click(function() {
-
-			$('#new-project-modal').modal()
-
-		})
-
-		$('#button-logout').click(function() {
-
-			let url = window.location.protocol + '//' + window.location.host
-			window.location = url + '/signout'
-
-		})
-
-		let fromBlankProj = false
-		$('#save-project').click(function() {
-
-			fromBlankProj = true
-			if (User.getUName() === 'Guest') {
-
-				showLogin()
-
-				if (!formOnCreate) {
-					formOnCreate = true
-					animateForm(0)
-				}
-			}
-			else {
-				$('#new-project-modal').modal()
-			}
-
-		})
-
-		$('#new-project-form').submit(function(e) {
-
-			e.preventDefault()
-			$('#new-project-modal').modal('hide')
-
-			let pjtName = $('#new-project-modal #new-project-name').val()
-			let uname = User.getUName()
-			let voxels = []
-			if (fromBlankProj) {
-				fromBlankProj = false
-				voxels = WorldData.getVoxelsArr()
-			}
-
-			if (uname && uname !== 'Guest') {
-
-				SocketHandler.createProject(pjtName, voxels, function(err) {
-					let url = window.location.protocol +  '//' + window.location.host
-					if (err) {
-
-						console.log(err)
-
-						let msg
-						let responses = SocketResponses.get()
-						if (err === responses.unexpectedErr)
-							msg = 'Unexpected error.'
-						else if (err === responses.noProjName)
-							msg = 'You must specify a project name.'
-						else if (err === responses.duplicateProj)
-							msg = 'A project with that name already exists.'
-						else
-							msg = 'Unknown.'
-
-						alert('Error: Project not created. ' + msg)
-					}
-					else {
-						console.log('Created project ' + pjtName)
-						window.location = url + '/user/' + uname + '/' + pjtName
-					}
-
-				})
-			} else {
-				console.log('Guests should be able to create new projects..??')
-			}
-		})
-
-		$('.delete-proj').click(function() {
-			confirm('ta')
-			console.log('elete')
-		})
-
-		$('#user-projects').click(function () {
-		    SocketHandler.requestProjects(function(projects) {
-
-	            let modalBody = $('#projects-modal .modal-body')
-	            $(modalBody).children().remove()
-
-				let len = projects.length
-				let i = 0
-	            projects.forEach(function(project) {
-
-	                let h5 = $('<h5>').html(project.name)
-					let open = $('<a>', { href: '/user/' + User.getUName() + '/' + project.name }).html('Open')
-					let del = $('<a>', { href: '/user/' + User.getUName() + '/delete/' + project.name, class: 'delete-proj' }).html('Delete')
-					let hr = $('<hr>')
-
-					modalBody.append(h5)
-					modalBody.append(open)
-					modalBody.append(' | ')
-					modalBody.append(del)
-					if (i < len - 1)
-						modalBody.append(hr)
-
-					i++
-
-	            })
-
-				$('#projects-modal').modal()
-
-		    })
-		})
-	}
-
 	/**
 	 * If the pick color button is clicked,
 	 * set the users state to pickcolor
-	 * @memberOf GUI
+	 * @memberOf GUIControlKit
 	 * @access private
 	 */
 	function togglePickColor() {
@@ -495,7 +248,7 @@ let GUI = function(window, undefined) {
 
 	/**
 	 * Set the block color to a random color
-	 * @memberOf GUI
+	 * @memberOf GUIControlKit
 	 * @access private
 	 */
 	function setRandomBlockColor() {
@@ -522,7 +275,7 @@ let GUI = function(window, undefined) {
 
 	/**
 	 * Get a random hex color
-	 * @memberOf GUI
+	 * @memberOf GUIControlKit
 	 * @access private
 	 * @return {number} The random hex color
 	 */

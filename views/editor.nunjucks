@@ -28,7 +28,8 @@
     <script src="/js/classes/MapControls.js"></script>
     <script src="/js/classes/User.js"></script>
     <script src="/js/classes/VoxelActions.js"></script>
-    <script src="/js/classes/GUI.js"></script>
+    <script src="/js/classes/GUIControlKit.js"></script>
+    <script src="/js/classes/GUIButtons.js"></script>
     <script src="/js/classes/Validation.js"></script>
     <!-- end game classes -->
 

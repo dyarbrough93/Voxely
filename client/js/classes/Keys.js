@@ -158,7 +158,7 @@ let Keys = function(window, undefined) {
 
         if (!User.stateIsDefault()) {
             if (User.stateIsPick())
-                GUI.togglePickColor()
+                GUIControlKit.togglePickColor()
             User.setDefaultState()
         }
 
