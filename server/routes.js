@@ -19,7 +19,8 @@ module.exports = function(passport, devEnv, local) {
 			return res.redirect('/user/' + req.user.username)
 
 		return res.render('editor', {
-			dev: devEnv
+			dev: devEnv,
+			constraints: config.loginForm
 		})
 
 	})
@@ -44,7 +45,8 @@ module.exports = function(passport, devEnv, local) {
 
 		return res.render('editor', {
 			user: req.user,
-			dev: devEnv
+			dev: devEnv,
+			constraints: config.loginForm
 		})
 
 	})
@@ -65,7 +67,8 @@ module.exports = function(passport, devEnv, local) {
 					return res.render('editor', {
 						user: req.user,
 						dev: devEnv,
-						project: JSON.stringify(project)
+						project: JSON.stringify(project),
+						constraints: config.loginForm
 					})
 				}
 			}
