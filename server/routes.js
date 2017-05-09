@@ -34,7 +34,7 @@ module.exports = function(passport, devEnv, local) {
 
 	router.get('/user/:username', function(req, res) {
 
-		if (!req.user || req.user.username !== req.params.username) return res.redirect('/')
+		if (!req.isAuthenticated() || req.user.username !== req.params.username) return res.redirect('/')
 
 		// clear form data
 		req.session.loginFormData = {}
@@ -53,7 +53,7 @@ module.exports = function(passport, devEnv, local) {
 
 	router.get('/user/:username/:projectname', function(req, res) {
 
-		if (!req.user || req.user.username !== req.params.username) return res.redirect('/')
+		if (!req.isAuthenticated() || req.user.username !== req.params.username) return res.redirect('/')
 
 		let pjtName = req.params.projectname
 		let uname = req.user.username
