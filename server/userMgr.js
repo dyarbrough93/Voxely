@@ -370,14 +370,26 @@ module.exports = {
 							return cb(err)
 						}
 
-						user.save(function(err) {
-							if (err) {
-								console.log(err)
-								return cb(err)
-							}
-							projects.splice(i, 1)
+						User.findOne({ username: uname }, function(err, user) {
 
-							return cb(null)
+							if (err) return cb(err)
+
+							for (let i = 0; i < user.projects.length; i++) {
+								if (user.projects[i].name === pjtName) {
+									user.projects.splice(i, 1)
+									break
+								}
+							}
+
+							user.save(function(err) {
+								if (err) {
+									console.log(err)
+									return cb(err)
+								}
+								projects.splice(i, 1)
+
+								return cb(null)
+							})
 						})
 					})
 
