@@ -131,6 +131,7 @@ let VoxelActions = function(window, undefined) {
                 })
             } else {
                 deleteVoxelAtGridPos(gPos)
+                return done(true)
             }
         }
     }

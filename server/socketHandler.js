@@ -58,7 +58,7 @@ function handleBlockOperations(socket, io) {
         // try to remove the block
         let res = userMgr.removeBlockFromProj(gPos, uname, pjtName)
         if (res) return callback(responses.success)
-        return callback
+        return callback(res)
 
     })
 

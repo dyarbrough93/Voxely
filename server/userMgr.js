@@ -5,9 +5,55 @@ const responses = require('./socketResponses.js')
 
 let users = {}
 
+function vec3Eq(vec1, vec2) {
+	return vec1.x === vec2.x &&
+		   vec1.y === vec2.y &&
+		   vec1.z === vec2.z
+}
+
+function copyMongoProject(mongoProject) {
+	return {
+		name: mongoProject.name,
+		authorizedUsers: [],
+		voxels: (function() {
+			let voxels = []
+			mongoProject.voxels.forEach(function(voxel) {
+				voxels.push({
+					position: voxel.position,
+					color: voxel.color
+				})
+			})
+			return voxels
+		})()
+	}
+}
+
+function copyMongoUser(mongoUser) {
+	return {
+		projects: (function() {
+			let projects = []
+			mongoUser.projects.forEach(function(project) {
+				projects.push(copyMongoProject(project))
+			})
+			return projects
+		})()
+	}
+}
+
 module.exports = {
 
 	test: function() {
+
+		users['oBsceni9ty'].projects.forEach(function(project) {
+			if (project.name === 'dfsdf') {
+				let vox = new Voxel({
+					position: {x:0,y:0,z:0},
+					color: 0
+				})
+				project.voxels.push(vox)
+				console.log(project.voxels)
+			}
+		})
 	},
 
 	isConnected: function(uname) {
@@ -28,6 +74,7 @@ module.exports = {
 	},
 
 	removeBlockFromProj: function(gPos, uname, pjtName) {
+
 		let user = users[uname]
 
 		if (user) {
@@ -39,24 +86,42 @@ module.exports = {
 
 					let voxels = project.voxels
 					for (var j = 0; j < voxels.length; j++) {
+
 						let voxel = voxels[j]
+
 						if (!voxel || !voxel.position) {
 							console.log('voxel undefined')
 							continue
 						}
-						if (voxel.position.x === gPos.x &&
-							voxel.position.y === gPos.y &&
-							voxel.position.z === gPos.z) {
 
-								Voxel.findOne({ _id: voxel._id })
-									.remove().exec()
+						if (vec3Eq(voxel.position, gPos)) {
 
-								voxels.splice(j, 1)
+							console.log(voxel)
 
-								project.save()
+							if (voxel.needsUpdate) {
+
+								// hasn't been saved yet, just remove
+								// from temp arr
+								if (voxel.operation === 'add') {
+									voxels.splice(j, 1)
+									console.log(voxels)
+									return true
+								}
+								else if (voxel.operation === 'remove')
+									return false // already flagged for removal
+							}
+
+							else {
+								// already saved in db,
+								// flag for removal
+								voxel.needsUpdate = true
+								voxel.operation = 'remove'
+
+								console.log(voxels)
 
 								return true
 							}
+						}
 					}
 					console.log('voxel not found')
 					return false
@@ -81,15 +146,25 @@ module.exports = {
 			for (let i = 0; i < projects.length; i++) {
 				let project = projects[i]
 				if (project.name === pjtName) {
-					let vox = new Voxel({
+
+					let voxels = project.voxels
+
+					// check if voxel already exists
+					for (let j = 0; j < voxels.length; j++) {
+						if (vec3Eq(block.position, voxels[j].position)) {
+							return false
+						}
+					}
+
+					// voxel doesn't exist
+					project.voxels.push({
+						needsUpdate: true,
+						operation: 'add',
 						position: block.position,
 						color: block.color
 					})
-					project.voxels.push(vox)
 
-					vox.save() // no err check
-
-					project.save()
+					console.log(project.voxels)
 
 					return true
 				}
@@ -129,17 +204,20 @@ module.exports = {
 			.exec(function(err, user) {
 
 				if (err) {
-					console.log(err, arguments.callee)
+					console.log(err)
 					return cb(err)
 				}
 
 				if (!user) {
-					console.log('user ' + uname + ' does not exist', arguments.callee)
+					console.log('user ' + uname + ' does not exist')
 					return cb(responses.noExist)
 				}
 
-				users[user.username] = user
+				users[user.username] = copyMongoUser(user)
 				users[user.username].sockid = sockid
+
+				console.log(users[user.username])
+				console.log(users[user.username].voxels)
 
 				return cb(null)
 
@@ -165,13 +243,13 @@ module.exports = {
 						.exec(function(err) {
 
 						if (err) {
-							console.log(err, arguments.callee)
+							console.log(err)
 							return cb(err)
 						}
 
 						user.save(function(err) {
 							if (err) {
-								console.log(err, arguments.callee)
+								console.log(err)
 								return cb(err)
 							}
 							projects.splice(i, 1)
@@ -184,7 +262,7 @@ module.exports = {
 				}
 			}
 		} else {
-			console.log('user cache not found', arguments.callee)
+			console.log('user cache not found')
 			return cb('user cache not found')
 		}
 
@@ -224,7 +302,7 @@ module.exports = {
 			project.save(function(err) {
 
 				if (err) {
-					console.log(err, arguments.callee)
+					console.log(err)
 					return cb(err)
 				}
 
@@ -232,20 +310,15 @@ module.exports = {
 
 					if (err) console.log(err)
 
-					user.projects.push(popProject)
+					user.projects.push(copyMongoProject(popProject))
 
-					user.save(function(err) {
-						if (err) {
-							console.log(err, arguments.callee)
-							return cb(err)
-						}
-						return cb(null)
-					})
+					return cb(null)
+
 				})
 			})
 
 		} else {
-			console.log('user cache not found', arguments.callee)
+			console.log('user cache not found')
 			return cb(responses.unexpectedErr)
 		}
 	}

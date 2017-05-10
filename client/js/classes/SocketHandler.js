@@ -36,9 +36,9 @@ let SocketHandler = function(window, undefined) {
 
 	}
 
-	function createProject(name, voxels, cb) {
+	function createProject(pjtName, voxels, cb) {
 
-		socket.emit('create project', name, voxels, cb)
+		socket.emit('create project', pjtName, voxels, cb)
 
 	}
 
