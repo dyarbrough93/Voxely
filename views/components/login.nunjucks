@@ -15,6 +15,11 @@
             font-weight: bold;
             text-align: center;
         }
+        #login-info {
+            color: red;
+            margin-bottom: 10px;
+            display: none;
+        }
     </style>
 {% endblock %}
 
@@ -39,6 +44,7 @@
 
     <div id="login-modal" class="login-page">
         <div id="login-forms" class="form">
+            <p id="login-info">Create an account to save projects (your current changes will be maintained).</p>
             <form class="register-form" id="register-form" method="POST" action="/signup">
                 <input id="regusername" maxlength="{{ constraints.lowMaxLength }}" type="text" name="username" pattern="[\w_]+" value="{{ signupFormData.username }}" placeholder="username" required/>
                 <input id="pwd" pattern="{% raw %}.{{% endraw %}{{ constraints.minLength }},}" maxlength="20" type="password" name="password" placeholder="password" required/>

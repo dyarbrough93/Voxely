@@ -47,6 +47,7 @@ let GUIButtons = (function(window, undefined) {
         User.setProjectNeedsSave(false)
         if (User.getUName() === 'Guest') {
 
+            $('#login-info').css('display', 'block')
             showLogin()
 
             if (!formOnCreate) {
