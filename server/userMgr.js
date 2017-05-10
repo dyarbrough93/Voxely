@@ -75,11 +75,11 @@ module.exports = {
 
 	removeBlockFromProj: function(gPos, uname, pjtName) {
 
-		let user = users[uname]
+		let userCache = users[uname]
 
-		if (user) {
+		if (userCache) {
 
-			let projects = user.projects
+			let projects = userCache.projects
 			for (let i = 0; i < projects.length; i++) {
 				let project = projects[i]
 				if (project.name === pjtName) {
@@ -138,11 +138,11 @@ module.exports = {
 
 	addBlockToProj: function(block, uname, pjtName) {
 
-		let user = users[uname]
+		let userCache = users[uname]
 
-		if (user) {
+		if (userCache) {
 
-			let projects = user.projects
+			let projects = userCache.projects
 			for (let i = 0; i < projects.length; i++) {
 				let project = projects[i]
 				if (project.name === pjtName) {
@@ -226,11 +226,11 @@ module.exports = {
 
 	deleteProject: function(uname, pjtName, cb) {
 
-		let user = users[uname]
+		let userCache = users[uname]
 
-		if (user) {
+		if (userCache) {
 
-			let projects = user.projects
+			let projects = userCache.projects
 
 			for (let i = 0; i < projects.length; i++) {
 
@@ -274,12 +274,12 @@ module.exports = {
 			return cb(responses.noProjName)
 		}
 
-		let user = users[uname]
+		let userCache = users[uname]
 
-		if (user) {
+		if (userCache) {
 
-			for (let i = 0; i < user.projects.length; i++) {
-				if (user.projects[i].name === pjtName)
+			for (let i = 0; i < userCache.projects.length; i++) {
+				if (userCache.projects[i].name === pjtName)
 					return cb(responses.duplicateProj)
 			}
 
@@ -310,7 +310,7 @@ module.exports = {
 
 					if (err) console.log(err)
 
-					user.projects.push(copyMongoProject(popProject))
+					userCache.projects.push(copyMongoProject(popProject))
 
 					return cb(null)
 
