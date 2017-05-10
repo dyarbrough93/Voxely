@@ -9,6 +9,11 @@ var Main = function() {
 
     $(document).ready(function() {
 
+        window.onbeforeunload = function(e) {
+            if (User.projectNeedsSave()) return ''
+            return
+        }
+
         // prevent middle click directional scroll
         $('body').mousedown(function(e) {
             if (e.button == 1)

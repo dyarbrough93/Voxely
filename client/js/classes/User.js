@@ -16,6 +16,7 @@ let User = function(window, undefined) {
     let currentHoveredUser
     let actionDelay
     let currentProject
+    let projNeedsSave
 
     /*------------------------------------*
      :: Public Methods
@@ -40,6 +41,8 @@ let User = function(window, undefined) {
 
         // from editor.nunjucks
         currentProject = njProject
+
+        projNeedsSave = false
 
         let now = Date.now()
         actionTimer = new Date(now - actionDelay)
@@ -95,6 +98,10 @@ let User = function(window, undefined) {
         currentHoveredUser = user
     }
 
+    function setProjectNeedsSave(val) {
+        projNeedsSave = val
+    }
+
     /*********** getters *************/
 
     function getCurrentProject() {
@@ -131,6 +138,10 @@ let User = function(window, undefined) {
         return actionDelay
     }
 
+    function projectNeedsSave() {
+        return projNeedsSave
+    }
+
     /*********** expose public methods *************/
 
     return {
@@ -145,7 +156,9 @@ let User = function(window, undefined) {
         getCurrentHoveredUser: getCurrentHoveredUser,
         setCurrentHoveredUser: setCurrentHoveredUser,
         getActionDelay: getActionDelay,
-        getCurrentProject: getCurrentProject
+        getCurrentProject: getCurrentProject,
+        projectNeedsSave: projectNeedsSave,
+        setProjectNeedsSave: setProjectNeedsSave
     }
 
 }(window)

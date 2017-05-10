@@ -74,13 +74,14 @@ let VoxelActions = function(window, undefined) {
 
         if (User.getCurrentProject()) {
 
-            $('#save-curr-project').css('display', 'block')
 
             SocketHandler.emitBlockAdded(gPos, hexString, function(response) {
 
                 let responses = SocketResponses.get()
 
                 if (response === responses.success) {
+                    $('#save-curr-project').css('display', 'block')
+                    User.setProjectNeedsSave(true)
                     createVoxelAtGridPos(gPos, hexString)
                     return done(true)
                 } else {
@@ -96,6 +97,7 @@ let VoxelActions = function(window, undefined) {
 
         } else {
             $('#save-as-project').css('display', 'block')
+            User.setProjectNeedsSave(true)
             createVoxelAtGridPos(gPos, hexString)
             return done(true)
         }
@@ -121,11 +123,12 @@ let VoxelActions = function(window, undefined) {
 
             if (User.getCurrentProject()) {
 
-                $('#save-curr-project').css('display', 'block')
 
                 SocketHandler.emitBlockRemoved(gPos, function(response) {
                     let responses = SocketResponses.get()
                     if (response === responses.success) {
+                        $('#save-curr-project').css('display', 'block')
+                        User.setProjectNeedsSave(true)
                         deleteVoxelAtGridPos(gPos)
                         return done(true)
                     } else { // handle errs

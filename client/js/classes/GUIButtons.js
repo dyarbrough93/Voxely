@@ -188,6 +188,7 @@ let GUIButtons = (function(window, undefined) {
                 else {
                     alert('Project saved!')
                     $('#save-curr-project').css('display', 'none')
+                    User.setProjectNeedsSave(false)
                 }
             })
         })
