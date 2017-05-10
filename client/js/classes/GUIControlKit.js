@@ -159,9 +159,34 @@ let GUIControlKit = function(window, undefined) {
 		}
 	}
 
-	function showModal() {
-		$('#welcome-modal').modal()
+	/**
+	 * If the pick color button is clicked,
+	 * set the users state to pickcolor
+	 * @memberOf GUIControlKit
+	 * @access private
+	 */
+	function togglePickColor() {
+		if (User.stateIsDefault()) {
+			$('#controlKit [value="Color Picker"]').val('Click Voxel')
+			User.setPickState()
+		} else if (User.stateIsPick()) {
+			$('#controlKit [value="Click Voxel"]').val('Color Picker')
+			User.setDefaultState()
+		}
 	}
+
+	function getControlKit() {
+		return controlKit
+	}
+
+	function setConnectedClients(num) {
+		settings.connectedClients = num
+	}
+
+
+	/*------------------------------------*
+	 :: Private Methods
+	 *------------------------------------*/
 
 	/**
 	 * Add the necessary elements to the gui
@@ -230,20 +255,8 @@ let GUIControlKit = function(window, undefined) {
 
 	}
 
-	/**
-	 * If the pick color button is clicked,
-	 * set the users state to pickcolor
-	 * @memberOf GUIControlKit
-	 * @access private
-	 */
-	function togglePickColor() {
-		if (User.stateIsDefault()) {
-			$('#controlKit [value="Color Picker"]').val('Click Voxel')
-			User.setPickState()
-		} else if (User.stateIsPick()) {
-			$('#controlKit [value="Click Voxel"]').val('Color Picker')
-			User.setDefaultState()
-		}
+	function showModal() {
+		$('#welcome-modal').modal()
 	}
 
 	/**
@@ -281,14 +294,6 @@ let GUIControlKit = function(window, undefined) {
 	 */
 	function randomHexColor() {
 		return new THREE.Color(0xffffff * Math.random())
-	}
-
-	function getControlKit() {
-		return controlKit
-	}
-
-	function setConnectedClients(num) {
-		settings.connectedClients = num
 	}
 
 	/*********** expose public methods *************/
