@@ -40,7 +40,7 @@
     <div id="login-modal" class="login-page">
         <div id="login-forms" class="form">
             <form class="register-form" id="register-form" method="POST" action="/signup">
-                <input maxlength="{{ constraints.lowMaxLength }}" type="text" name="username" pattern="[\w_]+" value="{{ signupFormData.username }}" placeholder="username" required/>
+                <input id="regusername" maxlength="{{ constraints.lowMaxLength }}" type="text" name="username" pattern="[\w_]+" value="{{ signupFormData.username }}" placeholder="username" required/>
                 <input id="pwd" pattern="{% raw %}.{{% endraw %}{{ constraints.minLength }},}" maxlength="20" type="password" name="password" placeholder="password" required/>
                 <input id="confirmPwd" maxlength="20" type="password" placeholder="confirm password" required/>
                 <button>create</button>
@@ -48,8 +48,8 @@
                     <a href="#">Sign In</a>
                 </p>
             </form>
-            <form class="login-form" method="POST" action="/login">
-                <input maxlength="{{ constraints.lowMaxLength }}" type="text" name="username" value="{{ loginFormData.username }}" placeholder="username" required/>
+            <form id="login-form" class="login-form" method="POST" action="/login">
+                <input id="logusername" maxlength="{{ constraints.lowMaxLength }}" type="text" name="username" value="{{ loginFormData.username }}" placeholder="username" required/>
                 <input maxlength="{{ constraints.lowMaxLength }}" type="password" name="password" placeholder="password" required/>
                 <button>login</button>
                 <p class="message">Not registered?
@@ -63,13 +63,23 @@
 
         $('#register-form').submit(function(e) {
 
-            let password = $("#pwd").val()
-            let confirmPassword = $("#confirmPwd").val()
+            let password = $('#pwd').val()
+            let confirmPassword = $('#confirmPwd').val()
 
             if (password !== confirmPassword) {
                 alert('Passwords do not match!')
                 e.preventDefault()
             }
+
+            User.setProjectNeedsSave(false)
+            SocketHandler.cacheTempUser($('#regusername').val())
+
+        })
+
+        $('#login-form').submit(function(e) {
+
+            User.setProjectNeedsSave(false)
+            SocketHandler.cacheTempUser($('#logusername').val())
 
         })
 

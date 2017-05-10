@@ -1,5 +1,5 @@
 <!-- Modal -->
-<div id="new-project-modal" class="modal modal-wide fade">
+<div id="new-project-modal" class="modal fade">
     <div class="modal-dialog">
         <div class="modal-content">
             <!-- Modal Header -->
@@ -18,7 +18,7 @@
 
                 <form id="new-project-form" role="form">
                     <div class="form-group">
-                        <label for="exampleInputEmail1">Project Name</label>
+                        <label>Project Name</label>
                         <input type="text" class="form-control" id="new-project-name" placeholder="Project Name" required/>
                     </div>
                     <button type="submit" class="btn btn-default">Submit</button>

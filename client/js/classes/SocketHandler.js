@@ -30,6 +30,14 @@ let SocketHandler = function(window, undefined) {
 
 	}
 
+	function cacheTempUser(uname) {
+
+		let voxels = WorldData.getVoxelsArr()
+		if (voxels.length)
+			socket.emit('cache temp user', uname, voxels)
+
+	}
+
 	function requestProjects(cb) {
 
 		socket.emit('get projects', cb)
@@ -197,6 +205,13 @@ let SocketHandler = function(window, undefined) {
 
 		})
 
+		socket.on('load temp cache', function(voxels) {
+			WorldData.loadIntoScene(voxels)
+			GameScene.render()
+			$('#save-as-project').css('display', 'block')
+			GUIButtons.saveAsProject()
+		})
+
 	}
 
 	function getSocket() {
@@ -213,7 +228,8 @@ let SocketHandler = function(window, undefined) {
 		getSocket: getSocket,
 		requestProjects: requestProjects,
 		createProject: createProject,
-		saveProject: saveProject
+		saveProject: saveProject,
+		cacheTempUser: cacheTempUser
 	}
 
 }()

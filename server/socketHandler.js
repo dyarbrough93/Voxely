@@ -2,12 +2,11 @@ const config = require('./config.js').server
 const responses = require('./socketResponses.js')
 const userMgr = require('./userMgr.js')
 
-const actionDelay = {}
-const connectedUsers = {}
 
 let worldData
 
-let i = 0
+let actionDelay = {}
+let tempUsers = {}
 
 function enoughTimePassed(socket) {
 
@@ -66,7 +65,7 @@ function handleBlockOperations(socket, io) {
 
         worldData.batchDelete(toDelete, function(deletedVoxels) {
 
-            for (var i = 0; i < deletedVoxels.length; i++) {
+            for (let i = 0; i < deletedVoxels.length; i++) {
                 socket.broadcast.emit('block removed', deletedVoxels[i])
             }
 
@@ -102,6 +101,12 @@ function handleBlockOperations(socket, io) {
         if (!uname || uname === 'Guest') return done('guest')
 
         userMgr.createProject(uname, pjtName, voxels, done)
+
+    })
+
+    socket.on('cache temp user', function(uname, voxels) {
+
+        tempUsers[uname] = voxels
 
     })
 
@@ -189,6 +194,10 @@ function IOHandler(io, _worldData) {
             userMgr.cacheUser(uname, socket.id, function(err) {
                 if (err) console.log(err)
             })
+            if (tempUsers[uname]) {
+                socket.emit('load temp cache', tempUsers[uname])
+                delete tempUsers[uname]
+            }
         }
 
         handleBlockOperations(socket, io)

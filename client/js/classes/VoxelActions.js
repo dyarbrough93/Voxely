@@ -74,7 +74,6 @@ let VoxelActions = function(window, undefined) {
 
         if (User.getCurrentProject()) {
 
-
             SocketHandler.emitBlockAdded(gPos, hexString, function(response) {
 
                 let responses = SocketResponses.get()
@@ -97,7 +96,8 @@ let VoxelActions = function(window, undefined) {
 
         } else {
             $('#save-as-project').css('display', 'block')
-            User.setProjectNeedsSave(true)
+            if (User.getUName() !== 'Guest')
+                User.setProjectNeedsSave(true)
             createVoxelAtGridPos(gPos, hexString)
             return done(true)
         }

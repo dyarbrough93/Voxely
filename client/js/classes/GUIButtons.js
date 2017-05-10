@@ -42,6 +42,23 @@ let GUIButtons = (function(window, undefined) {
 
  	}
 
+    function saveAsProject() {
+        fromBlankProj = true
+        User.setProjectNeedsSave(false)
+        if (User.getUName() === 'Guest') {
+
+            showLogin()
+
+            if (!formOnCreate) {
+                formOnCreate = true
+                animateForm(0)
+            }
+        }
+        else {
+            $('#new-project-modal').modal()
+        }
+    }
+
     function showLogin(animSpeed) {
 
 		$(document).trigger('modalOpened')
@@ -196,19 +213,7 @@ let GUIButtons = (function(window, undefined) {
         // prompt user to name / save project
 		$('#save-as-project').click(function() {
 
-			fromBlankProj = true
-			if (User.getUName() === 'Guest') {
-
-				showLogin()
-
-				if (!formOnCreate) {
-					formOnCreate = true
-					animateForm(0)
-				}
-			}
-			else {
-				$('#new-project-modal').modal()
-			}
+			saveAsProject()
 
 		})
 
@@ -299,7 +304,8 @@ let GUIButtons = (function(window, undefined) {
 	}
 
     return {
-        init: init
+        init: init,
+        saveAsProject: saveAsProject
     }
 
 })(window)
