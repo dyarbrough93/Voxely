@@ -53,7 +53,10 @@ let GUIControlKit = function(window, undefined) {
 				useAA: Config.getGeneral().aaOnByDefault
 			},
 			coords: '',
-			sliderRange: [5, 101],
+			workSpace: {
+				size: Config.getGrid().sqPerSideOfGrid,
+				range: [20, 200]
+			},
 			connectedClients: 0
 		}
 
@@ -183,6 +186,9 @@ let GUIControlKit = function(window, undefined) {
 		settings.connectedClients = num
 	}
 
+	function getWorkspaceSize() {
+		return settings.workSpace.size
+	}
 
 	/*------------------------------------*
 	 :: Private Methods
@@ -230,13 +236,24 @@ let GUIControlKit = function(window, undefined) {
 			})
 
 		mainPanel.addSubGroup({
-				label: 'Settings',
-				enable: false
+				label: 'Settings'/*,
+				enable: false*/
 			})
 			.addCheckbox(settings.userSettings, 'useAA', {
 				label: 'Antialiasing',
 				onChange: function() {
 					GameScene.switchRenderer()
+				}
+			})
+			.addSlider(settings.workSpace, 'size', 'range', {
+				label: 'Workspace Size',
+				step: 2,
+				dp: 0,
+				onChange: function() {
+					if (settings.workSpace.size % 2 !== 0)
+						settings.workSpace.size = settings.workSpace.size - 1
+					GameScene.initFloorGrid(settings.workSpace.size)
+					GameScene.initVoxelPlane(settings.workSpace.size * (Config.getGrid().blockSize / 2))
 				}
 			})
 
@@ -309,7 +326,8 @@ let GUIControlKit = function(window, undefined) {
 		setCoords: setCoords,
 		togglePickColor: togglePickColor,
 		getControlKit: getControlKit,
-		setConnectedClients: setConnectedClients
+		setConnectedClients: setConnectedClients,
+		getWorkspaceSize: getWorkspaceSize
 	}
 
 }(window)

@@ -222,7 +222,7 @@ let VoxelUtils = (function(window, undefined) {
 
     function withinGridBoundaries(gPos) {
 
-        let spsg = Config.getGrid().sqPerSideOfGrid
+        let spsg = GUIControlKit.getWorkspaceSize()
 
         let minxz = -(spsg / 2)
         let maxxz = spsg / 2

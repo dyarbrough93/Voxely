@@ -30,12 +30,18 @@ let GameScene = function(window, undefined) {
 
     // planes
     let voxelPlane
+    let voxGeom
     let mapControlsPlane
     let rspColors
+
+    let nullMat
 
     // grid
     let gridGeom
     let gridOutlineGeom
+    let gridConfig
+    let gridLines
+    let outlineLines
 
     // meshes
     let ghostMesh
@@ -56,7 +62,7 @@ let GameScene = function(window, undefined) {
         scene = new THREE.Scene()
         container = document.getElementById('container')
 
-        let gridConfig = Config.getGrid()
+        gridConfig = Config.getGrid()
 
         ;
         (function _initCamera() {
@@ -133,65 +139,15 @@ let GameScene = function(window, undefined) {
             let gridSize = gridConfig.size
             let blockSize = gridConfig.blockSize
 
-            let stdSideLen = gridSize * 2 + blockSize
-
-            let nullMat = new THREE.MeshBasicMaterial({
+            nullMat = new THREE.MeshBasicMaterial({
                 visible: false
             })
 
             // this is the plane the voxels are actually placed on.
-            ;
-            (function _initVoxelPlane() {
+            initVoxelPlane(gridConfig.size)
 
-                let voxGeom = new THREE.PlaneGeometry(stdSideLen, stdSideLen)
-                voxGeom.rotateX(-Math.PI / 2)
-
-                let voxelPlane = new THREE.Mesh(voxGeom, nullMat)
-                voxelPlane.name = 'plane'
-
-                Raycast.add(voxelPlane)
-
-                //let axisHelper = new THREE.AxisHelper(150)
-                //scene.add(axisHelper)
-
-            })()
-
-            ;
-            (function _floorGrid() {
-
-                gridGeom = new THREE.Geometry()
-                gridOutlineGeom = new THREE.Geometry()
-
-                function drawLine(geom, i) {
-
-                    geom.vertices.push(new THREE.Vector3(-size - 25, 0, i))
-                    geom.vertices.push(new THREE.Vector3( size + 25, 0, i))
-
-                    geom.vertices.push(new THREE.Vector3(i, 0, -size - 25))
-                    geom.vertices.push(new THREE.Vector3(i, 0,  size + 25))
-
-                }
-
-                let step = gridConfig.blockSize
-                let size = (gridConfig.sqPerSideOfGrid / 2) * blockSize
-
-                // grid outline
-                drawLine(gridOutlineGeom, -size - 25)
-                drawLine(gridOutlineGeom,  size + 25)
-
-                // grid
-                for (let i = -size + 25; i <= size - 25; i += step) {
-					drawLine(gridGeom, i)
-				}
-
-				let material = new THREE.LineBasicMaterial({ color: 0x000000, opacity: 0.15, transparent: true })
-
-				let gridLines = new THREE.LineSegments(gridGeom, material)
-				let outlineLines = new THREE.LineSegments(gridOutlineGeom, material)
-				scene.add(gridLines)
-				scene.add(outlineLines)
-
-            })()
+            // the floor grid lines
+            initFloorGrid(gridConfig.sqPerSideOfGrid)
 
             // This is the plane that MapControls uses to
             // pan and rotate
@@ -271,6 +227,69 @@ let GameScene = function(window, undefined) {
     function render() {
 
         renderer.render(scene, camera)
+
+    }
+
+    function initVoxelPlane(size) {
+
+        let stdSideLen = size * 2 + gridConfig.blockSize
+
+        Raycast.remove(voxelPlane)
+
+        voxGeom = new THREE.PlaneGeometry(stdSideLen, stdSideLen)
+        voxGeom.rotateX(-Math.PI / 2)
+
+        nullMat = new THREE.MeshBasicMaterial({
+            visible: false
+        })
+
+        voxelPlane = new THREE.Mesh(voxGeom, nullMat)
+        voxelPlane.name = 'plane'
+
+        Raycast.add(voxelPlane)
+
+        //let axisHelper = new THREE.AxisHelper(150)
+        //scene.add(axisHelper)
+
+    }
+
+    function initFloorGrid(gridSize) {
+
+        scene.remove(gridLines)
+        scene.remove(outlineLines)
+
+        gridGeom = new THREE.Geometry()
+        gridOutlineGeom = new THREE.Geometry()
+
+        function drawLine(geom, i) {
+
+            geom.vertices.push(new THREE.Vector3(-size - 25, 0, i))
+            geom.vertices.push(new THREE.Vector3( size + 25, 0, i))
+
+            geom.vertices.push(new THREE.Vector3(i, 0, -size - 25))
+            geom.vertices.push(new THREE.Vector3(i, 0,  size + 25))
+
+        }
+
+        let step = gridConfig.blockSize
+        let size = (gridSize / 2) * gridConfig.blockSize
+
+        // grid outline
+        drawLine(gridOutlineGeom, -size - 25)
+        drawLine(gridOutlineGeom,  size + 25)
+
+        // grid
+        for (let i = -size + 25; i <= size - 25; i += step) {
+            drawLine(gridGeom, i)
+        }
+
+        let material = new THREE.LineBasicMaterial({ color: 0x000000, opacity: 0.15, transparent: true })
+
+        gridLines = new THREE.LineSegments(gridGeom, material)
+        outlineLines = new THREE.LineSegments(gridOutlineGeom, material)
+
+        scene.add(gridLines)
+        scene.add(outlineLines)
 
     }
 
@@ -468,7 +487,9 @@ let GameScene = function(window, undefined) {
         getScene: getScene,
         getCamera: getCamera,
         setDirLightPos: setDirLightPos,
-        render: render
+        render: render,
+        initFloorGrid: initFloorGrid,
+        initVoxelPlane: initVoxelPlane
 
     }
 
