@@ -179,8 +179,21 @@ let GUIButtons = (function(window, undefined) {
 			$('#new-project-modal').modal()
 		})
 
+        $('#save-curr-project').click(function() {
+            SocketHandler.saveProject(User.getCurrentProject().name, function(err) {
+                if (err) {
+                    alert('Error: Project was not saved.')
+                    console.log(err)
+                }
+                else {
+                    alert('Project saved!')
+                    $('#save-curr-project').css('display', 'none')
+                }
+            })
+        })
+
         // prompt user to name / save project
-		$('#save-project').click(function() {
+		$('#save-as-project').click(function() {
 
 			fromBlankProj = true
 			if (User.getUName() === 'Guest') {

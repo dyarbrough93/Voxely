@@ -76,6 +76,15 @@ function handleBlockOperations(socket, io) {
 
     })
 
+    socket.on('save project', function(pjtName, done) {
+
+        let uname = socket.request.user.username
+        if (!uname || uname === 'Guest') return done('guest')
+
+        userMgr.saveProject(uname, pjtName, done)
+
+    })
+
     socket.on('get projects', function(done) {
 
         let uname = socket.request.user.username

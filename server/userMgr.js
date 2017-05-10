@@ -13,6 +13,7 @@ function vec3Eq(vec1, vec2) {
 
 function copyMongoProject(mongoProject) {
 	return {
+		_id: mongoProject._id,
 		name: mongoProject.name,
 		authorizedUsers: [],
 		voxels: (function() {
@@ -73,75 +74,124 @@ module.exports = {
 
 	},
 
+	// @TODO: rewrite this disgusting mess
 	saveProject(uname, pjtName, cb) {
 
 		let userCache = users[uname]
 
 		if (userCache) {
-			let project = userCache.projects
+			let projects = userCache.projects
 			for (let i = 0; i < projects.length; i++) {
 				let project = projects[i]
 				if (project.name === pjtName) {
+					Project.findOne({ _id: project._id }, function(err, mProject) {
+						if (err) return cb(err)
 
-					let voxels = project.voxels
-					let toAdd = []
-					let toRemove = []
-					for (let j = 0; j < voxels.length; j++) {
+						let voxels = project.voxels
+						let toAdd = []
+						let toRemove = []
+						for (let j = 0; j < voxels.length; j++) {
 
-						let voxel = voxels[j]
-						if (voxel.needsUpdate) {
+							let voxel = voxels[j]
+							if (voxel.needsUpdate) {
 
-							if (voxel.operation === 'add') {
+								if (voxel.operation === 'add') {
 
-								let vox = new Voxel({
-									position: voxel.position,
-									color: voxel.color
-								})
+									let vox = new Voxel({
+										position: voxel.position,
+										color: voxel.color
+									})
 
-								toAdd.push({ addVox: vox, cachedVox: voxel })
+									mProject.voxels.push(vox._id)
+									toAdd.push({ addVox: vox, cachedVox: voxel })
 
+								}
+								else if (voxel.operation === 'remove') {
+
+									// we should have the id here
+									mProject.voxels.pull(voxel._id)
+									toRemove.push(voxel)
+
+								}
+								else console.log('voxel.operation undefined or unrecognized')
 							}
-							else if (voxel.operation === 'remove') {
-
-								// we should have the id here
-								toRemove.push(voxel)
-
-							}
-							else console.log('voxel.operation undefined or unrecognized')
 						}
-					}
 
-					if (toAdd.length) {
+						let addDone = false
+						let removeDone = true
 
-						toAdd.forEach(function(voxPair) {
+						function trySave() {
 
-							let addVox = voxPair.addVox
-							let cachedVox = voxPair.cachedVox
+							if (!addDone || !removeDone) return
 
-							addVox.save(function(err) {
+							for (let k = voxels.length - 1; k >= 0; k--) {
+								if (voxels[k].spliceMe) voxels.splice(k, 1)
+							}
 
-								if (err) console.log(err)
-								else {
-									cachedVox._id = addVox._id
-									cachedVox.needsUpdate = false
-									cachedVox.operation = null
-								}
+							mProject.save(function(err) {
+								if (err) return cb(err)
+								User.findOne({ username: uname }, function(err, user) {
+									if (err) return cb(err)
 
+									if (user.projects.indexOf(mProject._id) === -1) {
+										user.projects.push(mProject)
+										user.save(function(err) {
+											return cb(err)
+										})
+									} else {
+										return cb(null)
+									}
+								})
 							})
+						}
 
-						})
+						if (!toAdd.length) {
+							addDone = true
+							trySave()
+						} else {
+							let numAdded = 0
+							toAdd.forEach(function(voxPair) {
 
-						toRemove.forEach(function(cachedVox) {
+								let addVox = voxPair.addVox
+								let cachedVox = voxPair.cachedVox
 
-							Voxel.remove({ _id: cachedVox._id }, function(err) {
-								if (err) console.log(err)
-								else {
-									cachedVox.needsUpdate = false
-									cachedVox.operation = null
-								}
+								addVox.save(function(err) {
+									if (err) return cb(err)
+									else {
+										cachedVox._id = addVox._id
+										cachedVox.needsUpdate = false
+										cachedVox.operation = null
+									}
+									numAdded++
+									if (numAdded === toAdd.length) {
+										addDone = true
+										trySave()
+									}
+								})
 							})
-						})
-					}
+						}
+
+						if (!toRemove.length) {
+							removeDone = true
+							trySave()
+						} else {
+							let numRemoved = 0
+							toRemove.forEach(function(cachedVox) {
+
+								Voxel.remove({ _id: cachedVox._id }, function(err) {
+									if (err) return cb(err)
+									else {
+										cachedVox.spliceMe = true
+									}
+									numRemoved++
+									if (numRemoved === toRemove.length) {
+										removeDone = true
+										trySave()
+									}
+								})
+							})
+						}
+					})
 					break
 				}
 			}
@@ -150,7 +200,6 @@ module.exports = {
 			console.log('user cache not found')
 			return cb(false)
 		}
-
 	},
 
 	removeBlockFromProj: function(gPos, uname, pjtName) {
@@ -176,15 +225,12 @@ module.exports = {
 
 						if (vec3Eq(voxel.position, gPos)) {
 
-							console.log(voxel)
-
 							if (voxel.needsUpdate) {
 
 								// hasn't been saved yet, just remove
 								// from temp arr
 								if (voxel.operation === 'add') {
 									voxels.splice(j, 1)
-									console.log(voxels)
 									return true
 								}
 								else if (voxel.operation === 'remove')
@@ -196,8 +242,6 @@ module.exports = {
 								// flag for removal
 								voxel.needsUpdate = true
 								voxel.operation = 'remove'
-
-								console.log(voxels)
 
 								return true
 							}
@@ -243,8 +287,6 @@ module.exports = {
 						position: block.position,
 						color: block.color
 					})
-
-					console.log(project.voxels)
 
 					return true
 				}
@@ -293,11 +335,12 @@ module.exports = {
 					return cb(responses.noExist)
 				}
 
+				console.log(user)
+
 				users[user.username] = copyMongoUser(user)
 				users[user.username].sockid = sockid
 
 				console.log(users[user.username])
-				console.log(users[user.username].voxels)
 
 				return cb(null)
 

@@ -59,6 +59,7 @@ module.exports = function(passport, devEnv, local) {
 		let uname = req.user.username
 
 		let userCache = userMgr.getUserCache(uname)
+
 		if (userCache) {
 			let projects = userCache.projects
 			for (let i = 0; i < projects.length; i++) {

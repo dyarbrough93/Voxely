@@ -36,6 +36,12 @@ let SocketHandler = function(window, undefined) {
 
 	}
 
+	function saveProject(pjtName, cb) {
+
+		socket.emit('save project', pjtName, cb)
+
+	}
+
 	function createProject(pjtName, voxels, cb) {
 
 		socket.emit('create project', pjtName, voxels, cb)
@@ -206,7 +212,8 @@ let SocketHandler = function(window, undefined) {
 		emitBlockRemoved: emitBlockRemoved,
 		getSocket: getSocket,
 		requestProjects: requestProjects,
-		createProject: createProject
+		createProject: createProject,
+		saveProject: saveProject
 	}
 
 }()
