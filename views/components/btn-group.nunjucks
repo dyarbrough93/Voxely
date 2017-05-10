@@ -2,16 +2,7 @@
     .btn-group {
         position: absolute;
     }
-    #btn-links {
-        left: 50%;
-        transform: translate(-50%, 0);
-    }
 </style>
-
-<div id="btn-links" class="btn-group">
-    <a href="https://www.reddit.com/r/pixel_scape/" target="_blank" class="btn btn-default" role="button">Subreddit</a>
-    <a href="https://discordapp.com/channels/301547797134442496/301547797134442496" target="_blank" class="btn btn-primary" role="button">Discord</a>
-</div>
 
 <div id="btn-group" class="btn-group-vertical btn-group">
     <a id="download-obj" class="btn btn-info" role="button">Download Obj</a>
@@ -22,7 +13,7 @@
     <a class="btn btn-warning new-project" role="button">New Project</a>
     {% endif %}
     <a id="save-as-project" class="btn btn-success" role="button" style="display: none;">Save As New Project</a>
-    <a id="save-curr-project" class="btn btn-success" role="button" style="display: none;">Save This Project</a>
+    <a id="save-curr-project" class="btn btn-success" role="button" style="display: none;">Save</a>
     {% if user %}
     <a id="button-logout" class="btn btn-danger" role="button">Logout</a>
     {% else %}
