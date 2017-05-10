@@ -73,6 +73,86 @@ module.exports = {
 
 	},
 
+	saveProject(uname, pjtName, cb) {
+
+		let userCache = users[uname]
+
+		if (userCache) {
+			let project = userCache.projects
+			for (let i = 0; i < projects.length; i++) {
+				let project = projects[i]
+				if (project.name === pjtName) {
+
+					let voxels = project.voxels
+					let toAdd = []
+					let toRemove = []
+					for (let j = 0; j < voxels.length; j++) {
+
+						let voxel = voxels[j]
+						if (voxel.needsUpdate) {
+
+							if (voxel.operation === 'add') {
+
+								let vox = new Voxel({
+									position: voxel.position,
+									color: voxel.color
+								})
+
+								toAdd.push({ addVox: vox, cachedVox: voxel })
+
+							}
+							else if (voxel.operation === 'remove') {
+
+								// we should have the id here
+								toRemove.push(voxel)
+
+							}
+							else console.log('voxel.operation undefined or unrecognized')
+						}
+					}
+
+					if (toAdd.length) {
+
+						toAdd.forEach(function(voxPair) {
+
+							let addVox = voxPair.addVox
+							let cachedVox = voxPair.cachedVox
+
+							addVox.save(function(err) {
+
+								if (err) console.log(err)
+								else {
+									cachedVox._id = addVox._id
+									cachedVox.needsUpdate = false
+									cachedVox.operation = null
+								}
+
+							})
+
+						})
+
+						toRemove.forEach(function(cachedVox) {
+
+							Voxel.remove({ _id: cachedVox._id }, function(err) {
+								if (err) console.log(err)
+								else {
+									cachedVox.needsUpdate = false
+									cachedVox.operation = null
+								}
+							})
+						})
+					}
+					break
+				}
+			}
+		}
+		else {
+			console.log('user cache not found')
+			return cb(false)
+		}
+
+	},
+
 	removeBlockFromProj: function(gPos, uname, pjtName) {
 
 		let userCache = users[uname]
