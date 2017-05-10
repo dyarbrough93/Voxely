@@ -52,7 +52,6 @@ module.exports = {
 					color: 0
 				})
 				project.voxels.push(vox)
-				console.log(project.voxels)
 			}
 		})
 	},
@@ -335,12 +334,8 @@ module.exports = {
 					return cb(responses.noExist)
 				}
 
-				console.log(user)
-
 				users[user.username] = copyMongoUser(user)
 				users[user.username].sockid = sockid
-
-				console.log(users[user.username])
 
 				return cb(null)
 

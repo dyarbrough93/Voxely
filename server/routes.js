@@ -129,7 +129,6 @@ module.exports = function(passport, devEnv, local) {
 			if (err) return next(err)
 			if (!user) return res.redirect('/')
 
-			req.session.email = user.email
 			req.logIn(user, function(err) {
 				if (err) return next(err)
 				return res.redirect('/') // @TODO: save voxels

@@ -23,6 +23,7 @@ const passportSocketIo = require("passport.socketio")
 const flash = require('connect-flash')
 const mongoose = require('mongoose')
 mongoose.Promise = require('bluebird')
+// mongoose.set('debug', true)
 
 // my files
 const routes = require('./server/routes.js')(passport, devEnv, local)
