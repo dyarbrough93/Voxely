@@ -1,13 +1,3 @@
-<style>
-    .modal.modal-wide .modal-dialog {
-        width: 75%;
-    }
-    .modal-wide .modal-body {
-        overflow-y: auto;
-    }
-
-</style>
-
 <div id="projects-modal" class="modal fade">
     <div class="modal-dialog">
         <div class="modal-content">
