@@ -84,28 +84,21 @@ let GUIControlKit = function(window, undefined) {
 
 		if (objName !== 'plane') {
 
-			if (objName === 'BufferMesh') {
+			if (objName === 'voxel') {
 
-				let bufColArr = iObj.geometry.attributes.color.array
-				let idx = intersect.index * 3
+				pickColor = intersect.object.material.color
 
-				pickColor = new THREE.Color(bufColArr[idx], bufColArr[idx + 1], bufColArr[idx + 2])
+				let hColor = pickColor.getHex()
+				let hexString = '#' + pickColor.getHexString()
 
-			} else { // voxel
+				GameScene.setGhostMeshColor(hColor ^ 0x4C000000)
 
-				pickColor = intersect.face.color
+				settings.colors.blockColor = hexString
+				pushToSavedColors()
+
+				controlKit.update()
 
 			}
-
-			let hColor = pickColor.getHex()
-			let hexString = '#' + pickColor.getHexString()
-
-			GameScene.setGhostMeshColor(hColor ^ 0x4C000000)
-
-			settings.colors.blockColor = hexString
-			pushToSavedColors()
-
-			controlKit.update()
 
 		}
 
