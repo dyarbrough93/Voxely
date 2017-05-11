@@ -1,6 +1,6 @@
 Simple in-browser voxel editor with export to OBJ + MTL. Modified from https://github.com/dyarbrough93/PixelScape
 
-https://voxely.herokuapp.com
+https://voxel-y.herokuapp.com
 
 ### Resolving yarn.lock conflicts
 
