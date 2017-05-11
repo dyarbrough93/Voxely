@@ -90,7 +90,7 @@ let GameScene = function(window, undefined) {
                 r.setClearColor('#ffffff')
                 r.sortObjects = false
                 r.setSize(window.innerWidth, window.innerHeight)
-                r.setClearColor(0x000000, 0)
+                r.setClearColor(0, 0)
 
             }
 
