@@ -7,6 +7,6 @@ let projectSchema = new Schema({
     name: String,
     authorizedUsers: [String],
     voxels: [{type: Schema.Types.ObjectId, ref: 'Voxel'}],
-}, {collection: dev + 'projects'})
+}, {collection: dev + 'V2projects'})
 
 module.exports = mongoose.model('Project', projectSchema)
