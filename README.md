@@ -1,6 +1,6 @@
-Collaborative online 3D voxel environment editor.
+Simple in-browser voxel editor with export to OBJ + MTL. Modified from https://github.com/dyarbrough93/PixelScape
 
-https://pixelscape.herokuapp.com
+https://voxely.herokuapp.com
 
 ### Resolving yarn.lock conflicts
 
@@ -23,4 +23,4 @@ From https://github.com/yarnpkg/yarn/issues/1776#issuecomment-269539948
 >git rebase --continue
 >```
 >
->And I'm back in business. 
+>And I'm back in business.
