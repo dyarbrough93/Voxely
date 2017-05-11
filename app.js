@@ -29,7 +29,6 @@ mongoose.Promise = require('bluebird')
 const routes = require('./server/routes.js')(passport, devEnv, local)
 const initPassport = require('./server/passport/init.js')
 const mongoDB = require('./server/MongoDb.js')
-const worldData = require('./server/worldData.js')
 const socketHandler = require('./server/socketHandler.js')
 
 /*------------------------------------*
@@ -107,7 +106,7 @@ function onAuthorizeFail(data, message, error, accept) {
 
 }
 
-socketHandler(io, worldData)
+socketHandler(io)
 
 /*------------------------------------*
  :: Init and start server
@@ -115,12 +114,8 @@ socketHandler(io, worldData)
 
 mongoDB(mongoose, dbUrl, function() {
 
-	worldData.init(function() {
-
-		httpServer.listen(port, function() {
-			console.log('listening on *:' + port)
-		})
-
+	httpServer.listen(port, function() {
+		console.log('listening on *:' + port)
 	})
 
 })

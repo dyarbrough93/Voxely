@@ -2,9 +2,6 @@ const config = require('./config.js').server
 const responses = require('./socketResponses.js')
 const userMgr = require('./userMgr.js')
 
-
-let worldData
-
 let actionDelay = {}
 let tempUsers = {}
 
@@ -61,20 +58,6 @@ function handleBlockOperations(socket, io) {
 
     })
 
-    socket.on('batch delete', function(toDelete, done) {
-
-        worldData.batchDelete(toDelete, function(deletedVoxels) {
-
-            for (let i = 0; i < deletedVoxels.length; i++) {
-                socket.broadcast.emit('block removed', deletedVoxels[i])
-            }
-
-            done(deletedVoxels)
-
-        })
-
-    })
-
     socket.on('save project', function(pjtName, done) {
 
         let uname = socket.request.user.username
@@ -112,69 +95,7 @@ function handleBlockOperations(socket, io) {
 
 }
 
-function handleChunking(socket) {
-
-    // the client told us its ready for the
-    // data, so send it
-    socket.on('start chunking', function() {
-
-        console.log('chunking')
-
-        // prep for chunking by adding all
-        // keys to an array
-        let keys = []
-        for (let key in worldData.voxels) {
-            if (worldData.voxels.hasOwnProperty(key))
-                keys.push(key)
-        }
-
-        let chunk
-        let chunkSize = config.dataChunkSize,
-            kLen = keys.length // total data length
-
-        // tell the client what they're about to receive
-        socket.emit('chunking size', Math.ceil(kLen / chunkSize))
-
-        let i = 0,
-            j
-
-        // send chunks in delayed isntervals
-        let interval = setInterval(function() {
-
-            chunk = ''
-            j = 0
-
-            // construct this chunk and send it
-            for (i, j; i < kLen, j < chunkSize; i++, j++) {
-
-                if (i === kLen) break
-
-                // format it in JSON so it can be
-                // parsed by JSON.parse
-                let obj = worldData.voxels[keys[i]]
-                chunk += '"' + keys[i] + '"' + ':' + JSON.stringify(obj)
-
-                if (i !== kLen - 1) chunk += ','
-            }
-
-            // send the chunk
-            socket.emit('chunk', chunk)
-
-            // we're done
-            if (i > kLen - 1) {
-                clearTimeout(interval)
-                socket.emit('chunk done')
-            }
-
-        }, config.chunkInterval)
-
-    })
-
-}
-
-function IOHandler(io, _worldData) {
-
-    worldData = _worldData
+function IOHandler(io) {
 
     // new connection
     io.on('connection', function(socket) {
@@ -201,7 +122,6 @@ function IOHandler(io, _worldData) {
         }
 
         handleBlockOperations(socket, io)
-        handleChunking(socket)
 
         // client disconnected
         socket.on('disconnect', function() {
