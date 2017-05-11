@@ -17,7 +17,7 @@
             </div>
             <div class="modal-body">
                 <p>
-                    Welcome to PixelScape! In PixelScape, you can collaboratively create and edit voxel art.
+                    Welcome to Voxely! Voxely is a simple browser tool for voxel art, with export to OBJ + MTL.
                 </p>
             </p>
             <p>
@@ -52,20 +52,23 @@
             <p>
                 <code>Settings:Antialiasing</code>
                 &nbsp;Uncheck this to disable antialiasing if you are experiencing performance issues.</p>
-            <p></div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-            </div>
+            <p>
+                <code>Settings:Workspace Size</code>
+                &nbsp;Adjust the slider to change the size of the workspace.</p>
         </div>
-        <!-- /.modal-content -->
+        <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        </div>
     </div>
-    <!-- /.modal-dialog -->
+    <!-- /.modal-content -->
+</div>
+<!-- /.modal-dialog -->
 </div>
 <!-- /.modal -->
 
 <script>
-    $('#welcome-modal').on('show.bs.modal', function () {
-        let height = $(window).height() - 300
-        $(this).find('.modal-body').css('max-height', height)
-    })
+$('#welcome-modal').on('show.bs.modal', function () {
+    let height = $(window).height() - 300
+    $(this).find('.modal-body').css('max-height', height)
+})
 </script>

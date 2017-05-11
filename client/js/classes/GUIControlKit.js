@@ -204,7 +204,7 @@ let GUIControlKit = function(window, undefined) {
 		let mainPanel = controlKit.addPanel({
 			label: 'Controls',
 			align: 'right',
-			width: 275
+			width: 325
 		})
 
 		mainPanel.addSubGroup({
@@ -224,8 +224,7 @@ let GUIControlKit = function(window, undefined) {
 			.addButton('Random Color', settings.colors.randomColor)
 
 		mainPanel.addSubGroup({
-				label: 'Info',
-				enable: false
+				label: 'Info'
 			})
 			.addStringOutput(settings, 'coords', {
 				label: 'Coordinates'
@@ -236,8 +235,7 @@ let GUIControlKit = function(window, undefined) {
 			})
 
 		mainPanel.addSubGroup({
-				label: 'Settings'/*,
-				enable: false*/
+				label: 'Settings'
 			})
 			.addCheckbox(settings.userSettings, 'useAA', {
 				label: 'Antialiasing',

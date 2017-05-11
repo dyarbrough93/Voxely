@@ -34,6 +34,7 @@ var Main = function() {
 
         if (njProject)
             WorldData.loadIntoScene(njProject.voxels)
+        else GameScene.render()
 
     })
 
