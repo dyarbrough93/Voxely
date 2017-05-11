@@ -65,6 +65,10 @@ let GUIControlKit = function(window, undefined) {
 
 		initControlKit()
 
+		let uname = User.getUName()
+		if (!uname || uname === 'Guest')
+			showModal()	
+
 	}
 
 	/**
