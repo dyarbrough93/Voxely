@@ -380,59 +380,6 @@ let VoxelUtils = (function(window, undefined) {
 
     }
 
-    /*------------------------------------*
-     :: Private methods
-     *------------------------------------*/
-
-    /**
-     * Check if the voxel at the given coordinate
-     * exists in the voxels parameter
-     * @param  {number} x      The x coord to check
-     * @param  {number} y      The y boord to check
-     * @param  {number} z      The z coord to check
-     * @param  {WorldData.userData} voxels The voxels object we are checking
-     * @return {boolean}       Whether or not a voxel exists at the given coords
-     * @memberOf VoxelUtils
-     * @access private
-     */
-    function checkNeighbor(x, y, z, voxels) {
-
-        if (!voxels[x]) return false
-        if (!voxels[x][y]) return false
-        if (!voxels[x][y][z]) return false
-        return true
-
-    }
-
-    /**
-     * Remove all faces from the given geom
-     * with a normal vector matching the
-     * parameter one
-     * @param  {THREE.Geometry} geom The geometry
-     * @param  {THREE.Vector3} nVec The normal vector we are
-     * matching against
-     * @memberOf VoxelUtils
-     * @access private
-     */
-    function removeFaces(geom, nVec) {
-
-        for (let i = 0; i < geom.faces.length; i++) {
-
-            let face = geom.faces[i]
-
-            let n = face.normal
-            if (n.x === nVec.x && n.y === nVec.y && n.z === nVec.z)
-                delete geom.faces[i]
-
-        }
-
-        geom.faces = geom.faces.filter(function(v) {
-            return v
-        })
-        geom.elementsNeedUpdate = true // update faces
-
-    }
-
     /*********** expose public methods *************/
 
     return {
