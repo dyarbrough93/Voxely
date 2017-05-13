@@ -1,7 +1,7 @@
 'use strict'
 
 /**
- * Manages the game's dat.GUI
+ * Manages the game's ControlKit GUI
  * @namespace GUIControlKit
  */
 let GUIControlKit = function(window, undefined) {
@@ -67,7 +67,7 @@ let GUIControlKit = function(window, undefined) {
 
 		let uname = User.getUName()
 		if (!uname || uname === 'Guest')
-			showModal()	
+			showModal()
 
 	}
 
@@ -134,22 +134,19 @@ let GUIControlKit = function(window, undefined) {
 	/**
 	 * Set clicked to true or false
 	 * @memberOf GUIControlKit
+	 * @memberOf GUIControlKit
 	 * @access public
-	 * @param clicked What to set it to
 	 */
 	function setClicked(clicked) {
 		guiClicked = clicked
 	}
 
-	function destroy() {
-		gui.destroy()
-	}
-
-	function displayString(string) {
-		settings.debug.hoveredUser = string
-		controlKit.update()
-	}
-
+	/**
+	 * Display the currently hovered coordinates in the GUI
+	 * @memberOf GUIControlKit
+	 * @access public
+	 * @param {THREE.Intersect} planeIntx The plane intersect
+	 */
 	function setCoords(planeIntx) {
 
 		if (planeIntx) {
@@ -267,6 +264,11 @@ let GUIControlKit = function(window, undefined) {
 
 	}
 
+	/**
+	 * Show the welcome modal
+	 * @memberOf GUIControlKit
+	 * @access private
+	 */
 	function showModal() {
 		$('#welcome-modal').modal()
 	}
@@ -284,6 +286,11 @@ let GUIControlKit = function(window, undefined) {
 		controlKit.update()
 	}
 
+	/**
+	 * Push the old block color to our saved colors
+	 * @memberOf GUIControlKit
+	 * @access private
+	 */
 	function pushToSavedColors() {
 		let maxColors = Config.getGUI().maxSavedColors
 
@@ -313,7 +320,6 @@ let GUIControlKit = function(window, undefined) {
 	return {
 		init: init,
 		destroy: destroy,
-		displayString: displayString,
 		getBlockColor: getBlockColor,
 		wasClicked: wasClicked,
 		setClicked: setClicked,

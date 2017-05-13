@@ -50,6 +50,8 @@ let Mouse = function(window, undefined) {
 
 	}
 
+	/**************** getters ******************/
+
 	function getMousePos() {
 		return pos
 	}

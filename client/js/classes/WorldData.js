@@ -53,7 +53,7 @@ let WorldData = function(window, undefined) {
 	 * @memberOf WorldData
 	 * @access public
 	 * @param {object} data Contains all of the data
-	 * to load in, retrieved viq the SocketHandler
+	 * to load in, retrieved via the SocketHandler
 	 */
 	function loadIntoScene(data) {
 
@@ -72,10 +72,6 @@ let WorldData = function(window, undefined) {
 					let hColor = voxel.color
 					let tColor = new THREE.Color(hColor)
 
-					/*// vvv black magic, don't touch
-					if (i === 0) console.log(wPos)
-					// ^^^ somehow fixes raycast lag*/
-
 					VoxelActions.createVoxelAtGridPos(gPos, '#' + tColor.getHexString())
 
 				}
@@ -90,6 +86,12 @@ let WorldData = function(window, undefined) {
 
 	}
 
+	/**
+	 * Get the voxels currently in the scene as an array
+	 * @memberOf WorldData
+	 * @access public
+	 * @return {Object[]} Array of voxels
+	 */
 	function getVoxelsArr() {
 
 		let voxelsArr = []
@@ -135,14 +137,16 @@ let WorldData = function(window, undefined) {
 		delete worldData[coordStr]
 	}
 
+	/**************** getters ******************/
+
 	/**
 	 * Retrieve a voxel with the specified
-	 * section indices and coordStr
+	 * grid position
+	 * @access public
+	 * @memberOf WorldData
 	 * @param  {VoxelUtils.GridVector3} gPos Grid position of
 	 * the voxel to get
 	 * @return {object} The mesh or object
-	 * @access public
-	 * @memberOf WorldData
 	 */
 	function getVoxel(gPos) {
 		let coordStr = VoxelUtils.getCoordStr(gPos)

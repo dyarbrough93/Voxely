@@ -1,7 +1,7 @@
 'use strict'
 
 /**
- * Provides utility functions for VoxelWorld.js
+ * Contains a number of utility functions for working with voxels
  * @namespace VoxelUtils
  */
 let VoxelUtils = (function(window, undefined) {
@@ -34,11 +34,23 @@ let VoxelUtils = (function(window, undefined) {
      :: Public methods
      *------------------------------------*/
 
+     /**
+      * Check if a string is propery formatted as a VoxelUtils.coordStr
+      * @memberOf VoxelUtils
+      * @access public
+      * @return {boolean}
+      */
     String.prototype.isCoordStr = function() {
         let formatReg = /x[-]*\d+y[-]*\d+z[-]*\d+/
         return !!formatReg.exec(this)
     }
 
+    /**
+     * Get a hash hex string ('#1f3c5d86') from a THREE.Color
+     * @memberOf VoxelUtils
+     * @access public
+     * @return {string} The hash hex string
+     */
     THREE.Color.prototype.getHashHexString = function() {
         return '#' + this.getHexString()
     }
@@ -50,6 +62,7 @@ let VoxelUtils = (function(window, undefined) {
      * voxel at that location (multiples of 50 for x and z,
      * (multiples of 50) + 25 for y).
      * @memberOf VoxelUtils
+     * @access public
      */
     THREE.Vector3.prototype.snapToGrid = function() {
 
@@ -62,6 +75,7 @@ let VoxelUtils = (function(window, undefined) {
      * Converts a THREE.Vector3's values from world
      * coordinates to grid coordinates.
      * @memberOf VoxelUtils
+     * @access public
      */
     THREE.Vector3.prototype.worldToGrid = function() {
 
@@ -102,6 +116,7 @@ let VoxelUtils = (function(window, undefined) {
     /**
      * Marks this vector as a grid position (game coordinates).
      * @memberOf VoxelUtils
+     * @access public
      * @returns {VoxelUtils.GridVector3} This object
      */
     THREE.Vector3.prototype.initGridPos = function() {
@@ -112,6 +127,7 @@ let VoxelUtils = (function(window, undefined) {
     /**
      * Marks this vector as a world position (scene coordinates).
      * @memberOf VoxelUtils
+     * @access public
      * @returns {VoxelUtils.WorldVector3} This object
      */
     THREE.Vector3.prototype.initWorldPos = function() {
@@ -122,6 +138,7 @@ let VoxelUtils = (function(window, undefined) {
     /**
      * Tuple object.
      * @memberOf VoxelUtils
+     * @access public
      * @class Tuple
      * @type {object}
      * @property {number} a First value
@@ -150,6 +167,7 @@ let VoxelUtils = (function(window, undefined) {
      * it as a THREE.Vector3.
      *
      * @memberOf VoxelUtils
+     * @access public
      * @param {VoxelUtils.coordStr} coordStr Coordinate string representing
      * a grid position
      * @returns {THREE.Vector3} Parsed position vector
@@ -175,6 +193,7 @@ let VoxelUtils = (function(window, undefined) {
      * string.
      *
      * @memberOf VoxelUtils
+     * @access public
      * @param {VoxelUtils.GridVector3} gPos Position in grid coordinates
      * @returns {VoxelUtils.coordStr} Grid coordinate string
      */
@@ -186,6 +205,8 @@ let VoxelUtils = (function(window, undefined) {
     /**
      * Check if the given position is within
      * the global height limit
+     * @memberOf VoxelUtils
+     * @access public
      * @param  {VoxelUtils.GridVector3} gPos The position
      * @return {boolean}
      */
@@ -212,6 +233,8 @@ let VoxelUtils = (function(window, undefined) {
      * Check if the given position is both
      * within the selection bounds and less
      * than the global height limit
+     * @memberOf VoxelUtils
+     * @access public
      * @param  {VoxelUtils.GridVector3} gPos The position
      * we are checking
      * @return {boolean}
@@ -220,6 +243,14 @@ let VoxelUtils = (function(window, undefined) {
         return validHeight(gPos) && withinGridBoundaries(gPos)
     }
 
+    /**
+     * Checks if a position is within
+     * the boundaries of the grid
+     * @memberOf VoxelUtils
+     * @access public
+     * @param  {VoxelUtils.GridVector3} gPos The grid position
+     * @return {boolean}
+     */
     function withinGridBoundaries(gPos) {
 
         let spsg = GUIControlKit.getWorkspaceSize()
@@ -237,6 +268,8 @@ let VoxelUtils = (function(window, undefined) {
     /**
      * Initializes a voxel mesh with the specified position
      * @memberOf VoxelUtils.
+     * @memberOf VoxelUtils
+     * @access public
      * @param {object} args  Voxel parameters
      * @param {GridVector3} args.gPos Grid position
      * @param {number} args.color Hex color
@@ -270,6 +303,7 @@ let VoxelUtils = (function(window, undefined) {
      * object.
      *
      * @memberOf VoxelUtils
+     * @access public
      * @param {object} obj The object
      * @returns {number}
      */
@@ -281,6 +315,13 @@ let VoxelUtils = (function(window, undefined) {
         return num
     }
 
+    /**
+     * Get the grid position from an intersect
+     * @memberOf VoxelUtils
+     * @access public
+     * @param  {THREE.Intersect} intersect The intersect
+     * @return {VoxelUtils.GridVector3} Grid position, null on none
+     */
     function getGridPositionFromIntersect(intersect) {
 
         let gPos
@@ -310,64 +351,23 @@ let VoxelUtils = (function(window, undefined) {
     }
 
     /**
-     * Build and return an outline geometry for the
-     * given username.
-     * @param  {string} username The username we are building the geom for
-     * @return {THREE.Geomtetry} The outline geometry
+     * Convert a hexadecimal string to decimal
      * @memberOf VoxelUtils
      * @access public
+     * @param  {string} hexString The hex string
+     * @return {number} The decimal value
      */
-    function buildOutlineGeom(username) {
-
-        let voxels = WorldData.getUserVoxels(username)
-
-        let mergedGeo = new THREE.Geometry()
-        let blockSize = Config.getGrid().blockSize
-
-        for (let x in voxels) {
-            for (let y in voxels[x]) {
-                for (let z in voxels[x][y]) {
-
-                    x = parseInt(x)
-                    y = parseInt(y)
-                    z = parseInt(z)
-
-                    let wPos = new THREE.Vector3(x, y, z).gridToWorld()
-
-                    // geom / mesh
-                    let cubeGeo = new THREE.BoxGeometry(blockSize, blockSize, blockSize)
-                    let outlineMesh = new THREE.Mesh(cubeGeo)
-
-                    // mesh config
-                    outlineMesh.position.x = wPos.x
-                    outlineMesh.position.y = wPos.y
-                    outlineMesh.position.z = wPos.z
-                    outlineMesh.scale.multiplyScalar(1.5)
-
-                    // delete inner faces
-                    if (checkNeighbor(x - 1, y, z, voxels)) removeFaces(cubeGeo, new THREE.Vector3(-1, 0, 0))
-                    if (checkNeighbor(x + 1, y, z, voxels)) removeFaces(cubeGeo, new THREE.Vector3(1, 0, 0))
-                    if (checkNeighbor(x, y - 1, z, voxels)) removeFaces(cubeGeo, new THREE.Vector3(0, -1, 0))
-                    if (checkNeighbor(x, y + 1, z, voxels)) removeFaces(cubeGeo, new THREE.Vector3(0, 1, 0))
-                    if (checkNeighbor(x, y, z - 1, voxels)) removeFaces(cubeGeo, new THREE.Vector3(0, 0, -1))
-                    if (checkNeighbor(x, y, z + 1, voxels)) removeFaces(cubeGeo, new THREE.Vector3(0, 0, 1))
-
-                    // merge geoms
-                    outlineMesh.updateMatrix()
-                    mergedGeo.merge(outlineMesh.geometry, outlineMesh.matrix)
-
-                }
-            }
-        }
-
-        return mergedGeo
-
-    }
-
     function hexStringToDec(hexString) {
         return parseInt(hexString.substring(1), 16)
     }
 
+    /**
+     * Convert a hexadecimal string to RGB
+     * @memberOf VoxelUtils
+     * @access public
+     * @param  {string} hexString The hex string
+     * @return {Object} RGB object
+     */
     function hexStringToRgb(hexString) {
 
         let hs = hexString.charAt(0) === '#' ? hexString.substring(1) : hexString

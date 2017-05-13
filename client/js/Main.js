@@ -2,7 +2,7 @@
 
 /**
  * Initializes all classes and triggers
- * the server data retrieval
+ * loading of data into scene
  * @namespace Main
  */
 var Main = function() {

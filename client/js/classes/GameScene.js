@@ -230,6 +230,12 @@ let GameScene = function(window, undefined) {
 
     }
 
+    /**
+     * Setup the voxel plane with the given size
+     * @memberOf GameScene
+     * @access public
+     * @param  {Number} size Size of the plane
+     */
     function initVoxelPlane(size) {
 
         let stdSideLen = size * 2 + gridConfig.blockSize
@@ -253,6 +259,12 @@ let GameScene = function(window, undefined) {
 
     }
 
+    /**
+     * Setup the floor grid
+     * @memberOf GameScene
+     * @access public
+     * @param  {Number} gridSize Grid size
+     */
     function initFloorGrid(gridSize) {
 
         scene.remove(gridLines)
@@ -430,6 +442,13 @@ let GameScene = function(window, undefined) {
         container.removeChild(container.getElementsByTagName('canvas')[0])
     }
 
+    /**
+     * Set the position and target of the direcitonal light
+     * @memberOf GameScene
+     * @access public
+     * @param {VoxelUtils.WorldVector3} position World position to set
+     * @param {VoxelUtils.WorldVector3} target   What the light should look at (optional)
+     */
     function setDirLightPos(position, target) {
         trackingDirLight.position.set(position.x, position.y, position.z)
         if (target) trackingDirLight.target.position.set(target.x, 500, target.z)

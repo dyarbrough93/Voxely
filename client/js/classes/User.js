@@ -1,8 +1,9 @@
 'use strict'
 
 /**
- * Manages and stores the user's current state
- * @namespace UserState
+ * Manages and stores information on the user
+ * and user state
+ * @namespace User
  */
 let User = function(window, undefined) {
 
@@ -25,7 +26,7 @@ let User = function(window, undefined) {
     /**
      * Initializes the module. Must be called
      * before anything else
-     * @memberOf UserState
+     * @memberOf User
      * @access public
      */
     function init() {
@@ -52,7 +53,7 @@ let User = function(window, undefined) {
     /**
      * Reset the action timer to delay
      * actions again
-     * @memberOf UserState
+     * @memberOf User
      * @access public
      */
     function resetActionTimer() {
@@ -63,7 +64,7 @@ let User = function(window, undefined) {
      * Checks if the user can act
      * based on the actionDelay config
      * setting and the last time acted
-     * @memberOf UserState
+     * @memberOf User
      * @access public
      * @return {boolean}
      */
@@ -76,7 +77,7 @@ let User = function(window, undefined) {
 
     /**
      * Set the user state to default
-     * @memberOf UserState
+     * @memberOf User
      * @access public
      */
     function setDefaultState() {
@@ -86,16 +87,12 @@ let User = function(window, undefined) {
 
     /**
      * Set the user state to PICKCOLOR
-     * @memberOf UserState
+     * @memberOf User
      * @access public
      */
     function setPickState() {
         state = states.PICKCOLOR
         $('body').css('cursor', 'url(/img/picker.cur), auto')
-    }
-
-    function setCurrentHoveredUser(user) {
-        currentHoveredUser = user
     }
 
     function setProjectNeedsSave(val) {
@@ -106,20 +103,6 @@ let User = function(window, undefined) {
 
     function getCurrentProject() {
         return currentProject
-    }
-
-    /**
-     * Is the user state pick?
-     * @memberOf UserState
-     * @access public
-     * @return {boolean}
-     */
-    function stateIsPick() {
-        return state === states.PICKCOLOR
-    }
-
-    function stateIsDefault() {
-        return state === states.DEFAULT
     }
 
     function getUName() {
@@ -142,6 +125,14 @@ let User = function(window, undefined) {
         return projNeedsSave
     }
 
+    function stateIsPick() {
+        return state === states.PICKCOLOR
+    }
+
+    function stateIsDefault() {
+        return state === states.DEFAULT
+    }
+
     /*********** expose public methods *************/
 
     return {
@@ -154,7 +145,6 @@ let User = function(window, undefined) {
         setDefaultState: setDefaultState,
         setPickState: setPickState,
         getCurrentHoveredUser: getCurrentHoveredUser,
-        setCurrentHoveredUser: setCurrentHoveredUser,
         getActionDelay: getActionDelay,
         getCurrentProject: getCurrentProject,
         projectNeedsSave: projectNeedsSave,
