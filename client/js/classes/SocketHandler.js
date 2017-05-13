@@ -30,6 +30,14 @@ let SocketHandler = function(window, undefined) {
 
 	}
 
+	/**
+	 * Tells the server to make a temporary
+	 * cache for some user data so it can
+	 * be recovered on page reload
+	 * @memberOf SocketHandler
+	 * @access public
+	 * @param  {string} uname Temp username (not yet confirmed registered)
+	 */
 	function cacheTempUser(uname) {
 
 		let voxels = WorldData.getVoxelsArr()
@@ -38,30 +46,39 @@ let SocketHandler = function(window, undefined) {
 
 	}
 
+	/**
+	 * Get the list of projects for this
+	 * user from the server
+	 * @memberOf SocketHandler
+	 * @access public
+	 * @param  {Function} cb Callback to execute on completion
+	 */
 	function requestProjects(cb) {
-
 		socket.emit('get projects', cb)
-
 	}
 
+	/**
+	 * Save the project with the specified name
+	 * @memberOf SocketHandler
+	 * @access public
+	 * @param  {string}   pjtName Name of the project to save
+	 * @param  {Function} cb      Callback to execute on completion
+	 */
 	function saveProject(pjtName, cb) {
-
 		socket.emit('save project', pjtName, cb)
-
 	}
 
+	/**
+	 * Create a new project with the given
+	 * name / initial voxels
+	 * @memberOf SocketHandler
+	 * @access public
+	 * @param  {string} pjtName Name of the new project
+	 * @param  {Object[]} voxels  Array of voxels to add to the project
+	 * @param  {Function} cb      Callback to execute on completion
+	 */
 	function createProject(pjtName, voxels, cb) {
-
 		socket.emit('create project', pjtName, voxels, cb)
-
-	}
-
-	function saveProject(pjtName, cb) {
-
-		let voxels = WorldData.getWorldData()
-
-		socket.emit('save project', pjtName, cb)
-
 	}
 
 	/**
@@ -116,48 +133,13 @@ let SocketHandler = function(window, undefined) {
 	}
 
 	/**
-	 * Retrieve the world data from the server
-	 * @param  {Function} cb Callback to call with
-	 * the received data as the only parameter
+	 * Get the socket object
+	 * @return {Object} The socket
+	 * @memberOf SocketHandler
+	 * @access public
 	 */
-	function retrieveData(cb) {
-
-		socket.emit('start chunking')
-
-		let numChunks
-		let numChunksLoaded
-		let chunkData
-
-		// we get the number of chunks we are
-		// about to receive
-		socket.on('chunking size', function(size) {
-			console.log('receiving data from server ...')
-			numChunks = size
-		})
-
-		chunkData = '{'
-		numChunksLoaded = 0
-
-		// we receive a chunk
-		socket.on('chunk', function(chunk) {
-
-			numChunksLoaded++
-
-			if (numChunks > 0) {
-				let percent = ((numChunksLoaded / numChunks) * 100).toFixed(0)
-				console.log(percent + '% chunks loaded')
-			}
-
-			chunkData += chunk
-		})
-
-		// we have received all chunks
-		socket.on('chunk done', function() {
-			chunkData += '}'
-			chunkData = JSON.parse(chunkData)
-			console.log('done retrieving data')
-			cb(chunkData)
-		})
+	function getSocket() {
+		return socket
 	}
 
 	/*------------------------------------*
@@ -214,15 +196,10 @@ let SocketHandler = function(window, undefined) {
 
 	}
 
-	function getSocket() {
-		return socket
-	}
-
 	/*********** expose public methods *************/
 
 	return {
 		init: init,
-		retrieveData: retrieveData,
 		emitBlockAdded: emitBlockAdded,
 		emitBlockRemoved: emitBlockRemoved,
 		getSocket: getSocket,

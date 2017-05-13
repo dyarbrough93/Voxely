@@ -94,10 +94,6 @@ let User = function(window, undefined) {
         $('body').css('cursor', 'url(/img/picker.cur), auto')
     }
 
-    function setCurrentHoveredUser(user) {
-        currentHoveredUser = user
-    }
-
     function setProjectNeedsSave(val) {
         projNeedsSave = val
     }
@@ -106,20 +102,6 @@ let User = function(window, undefined) {
 
     function getCurrentProject() {
         return currentProject
-    }
-
-    /**
-     * Is the user state pick?
-     * @memberOf UserState
-     * @access public
-     * @return {boolean}
-     */
-    function stateIsPick() {
-        return state === states.PICKCOLOR
-    }
-
-    function stateIsDefault() {
-        return state === states.DEFAULT
     }
 
     function getUName() {
@@ -142,6 +124,14 @@ let User = function(window, undefined) {
         return projNeedsSave
     }
 
+    function stateIsPick() {
+        return state === states.PICKCOLOR
+    }
+
+    function stateIsDefault() {
+        return state === states.DEFAULT
+    }
+
     /*********** expose public methods *************/
 
     return {
@@ -154,7 +144,6 @@ let User = function(window, undefined) {
         setDefaultState: setDefaultState,
         setPickState: setPickState,
         getCurrentHoveredUser: getCurrentHoveredUser,
-        setCurrentHoveredUser: setCurrentHoveredUser,
         getActionDelay: getActionDelay,
         getCurrentProject: getCurrentProject,
         projectNeedsSave: projectNeedsSave,

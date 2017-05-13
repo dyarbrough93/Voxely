@@ -281,6 +281,12 @@ let VoxelUtils = (function(window, undefined) {
         return num
     }
 
+    /**
+     * Get the grid position from an intersect
+     * @memberOf VoxelUtils
+     * @param  {THREE.Intersect} intersect The intersect
+     * @return {VoxelUtils.GridVector3} Grid position, null on none
+     */
     function getGridPositionFromIntersect(intersect) {
 
         let gPos
@@ -310,64 +316,20 @@ let VoxelUtils = (function(window, undefined) {
     }
 
     /**
-     * Build and return an outline geometry for the
-     * given username.
-     * @param  {string} username The username we are building the geom for
-     * @return {THREE.Geomtetry} The outline geometry
+     * Convert a hexadecimal string to decimal
      * @memberOf VoxelUtils
-     * @access public
+     * @param  {string} hexString The hex string
+     * @return {number} The decimal value
      */
-    function buildOutlineGeom(username) {
-
-        let voxels = WorldData.getUserVoxels(username)
-
-        let mergedGeo = new THREE.Geometry()
-        let blockSize = Config.getGrid().blockSize
-
-        for (let x in voxels) {
-            for (let y in voxels[x]) {
-                for (let z in voxels[x][y]) {
-
-                    x = parseInt(x)
-                    y = parseInt(y)
-                    z = parseInt(z)
-
-                    let wPos = new THREE.Vector3(x, y, z).gridToWorld()
-
-                    // geom / mesh
-                    let cubeGeo = new THREE.BoxGeometry(blockSize, blockSize, blockSize)
-                    let outlineMesh = new THREE.Mesh(cubeGeo)
-
-                    // mesh config
-                    outlineMesh.position.x = wPos.x
-                    outlineMesh.position.y = wPos.y
-                    outlineMesh.position.z = wPos.z
-                    outlineMesh.scale.multiplyScalar(1.5)
-
-                    // delete inner faces
-                    if (checkNeighbor(x - 1, y, z, voxels)) removeFaces(cubeGeo, new THREE.Vector3(-1, 0, 0))
-                    if (checkNeighbor(x + 1, y, z, voxels)) removeFaces(cubeGeo, new THREE.Vector3(1, 0, 0))
-                    if (checkNeighbor(x, y - 1, z, voxels)) removeFaces(cubeGeo, new THREE.Vector3(0, -1, 0))
-                    if (checkNeighbor(x, y + 1, z, voxels)) removeFaces(cubeGeo, new THREE.Vector3(0, 1, 0))
-                    if (checkNeighbor(x, y, z - 1, voxels)) removeFaces(cubeGeo, new THREE.Vector3(0, 0, -1))
-                    if (checkNeighbor(x, y, z + 1, voxels)) removeFaces(cubeGeo, new THREE.Vector3(0, 0, 1))
-
-                    // merge geoms
-                    outlineMesh.updateMatrix()
-                    mergedGeo.merge(outlineMesh.geometry, outlineMesh.matrix)
-
-                }
-            }
-        }
-
-        return mergedGeo
-
-    }
-
     function hexStringToDec(hexString) {
         return parseInt(hexString.substring(1), 16)
     }
 
+    /**
+     * Convert a hexadecimal string to RGB
+     * @param  {string} hexString The hex string
+     * @return {Object} RGB object
+     */
     function hexStringToRgb(hexString) {
 
         let hs = hexString.charAt(0) === '#' ? hexString.substring(1) : hexString

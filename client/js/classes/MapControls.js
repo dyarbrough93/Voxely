@@ -2,9 +2,10 @@
 
 /**
  * @author Jacek Jankowski / http://grey-eminence.org/
+ * It is an adaptation of the three.js OrbitControls class to map environments
  */
 
-// It is an adaptation of the three.js OrbitControls class to map environments
+// further modified by Davis Yarbrough to work with this project
 
 /**
  * Handles the zoom, pan, and rotate controls

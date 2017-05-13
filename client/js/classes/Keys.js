@@ -44,6 +44,12 @@ let Keys = function(window, undefined) {
         return keyStates.shiftDown
     }
 
+    /**
+     * Is the control key currently down?
+     * @memberOf Keys
+     * @access public
+     * @return {boolean}
+     */
     function isCtrlDown() {
         return keyStates.ctrlDown
     }
@@ -55,6 +61,7 @@ let Keys = function(window, undefined) {
      * out of focus)
      * @memberOf Keys
      * @access public
+     * @param {boolean} value Value to set it to
      */
     function setCtrlDown(value) {
         keyStates.ctrlDown = value
@@ -68,6 +75,7 @@ let Keys = function(window, undefined) {
      * out of focus)
      * @memberOf Keys
      * @access public
+     * @param {boolean} value Value to set it to
      */
     function setShiftDown(value) {
         keyStates.shiftDown = value

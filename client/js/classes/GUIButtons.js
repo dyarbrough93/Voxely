@@ -1,66 +1,93 @@
+'use strict'
+
+/**
+ * Manages the game's bootstrap GUI buttons
+ * @namespace GUIButtons
+ */
 let GUIButtons = (function(window, undefined) {
 
     /*------------------------------------*
-     :: Class Variables
-     *------------------------------------*/
+	 :: Class Variables
+	 *------------------------------------*/
 
-     // export
- 	let exported
- 	let matFilename
+	// export
+	let exported
+	let matFilename
 
-    let fromBlankProj
-    let animSpeed
+	let fromBlankProj
+	let animSpeed
 
-    /*------------------------------------*
-     :: Public Methods
-     *------------------------------------*/
+	/*------------------------------------*
+	 :: Public Methods
+	 *------------------------------------*/
 
-     function init() {
+	/**
+	 * Initializes the module. Must be called
+	 * before anything else
+	 * @memberOf GUIButtons
+	 * @access public
+	 */
+	function init() {
 
- 		$(".btn").mouseup(function() {
- 			$(this).blur()
- 		})
+		$(".btn").mouseup(function() {
+			$(this).blur()
+		})
 
-        matFilename = 'voxelMats'
-        fromBlankProj = false
-        animSpeed = 185
+		matFilename = 'voxelMats'
+		fromBlankProj = false
+		animSpeed = 185
 
-        initModals()
- 		initProjectModals()
-        initDownloadButtons()
+		initModals()
+		initProjectModals()
+		initDownloadButtons()
 
-     }
+	}
 
-     /*------------------------------------*
+    /**
+     * Save current work as a new project
+     * @memberOf GUIButtons
+	 * @access public
+     */
+	function saveAsProject() {
+		fromBlankProj = true
+		User.setProjectNeedsSave(false)
+		if (User.getUName() === 'Guest') {
+
+			$('#login-info').css('display', 'block')
+			showLogin()
+
+			if (!formOnCreate) {
+				formOnCreate = true
+				animateForm(0)
+			}
+		} else {
+			$('#new-project-modal').modal()
+		}
+	}
+
+	/*------------------------------------*
  	 :: Private Methods
  	 *------------------------------------*/
 
- 	function exportVoxels() {
+    /**
+     * Get the OBJ + MTL files for this project
+     * @memberOf GUIButtons
+	 * @access private
+     */
+	function exportVoxels() {
 
- 		let exporter = new THREE.OBJExporter()
- 		exported = exporter.parse(GameScene.getScene(), matFilename)
+		let exporter = new THREE.OBJExporter()
+		exported = exporter.parse(GameScene.getScene(), matFilename)
 
- 	}
+	}
 
-    function saveAsProject() {
-        fromBlankProj = true
-        User.setProjectNeedsSave(false)
-        if (User.getUName() === 'Guest') {
-
-            $('#login-info').css('display', 'block')
-            showLogin()
-
-            if (!formOnCreate) {
-                formOnCreate = true
-                animateForm(0)
-            }
-        }
-        else {
-            $('#new-project-modal').modal()
-        }
-    }
-
-    function showLogin(animSpeed) {
+    /**
+     * Show the login modal
+     * @memberOf GUIButtons
+	 * @access private
+     * @param  {Number} animSpeed Speed to animate at
+     */
+	function showLogin(animSpeed) {
 
 		$(document).trigger('modalOpened')
 
@@ -81,6 +108,12 @@ let GUIButtons = (function(window, undefined) {
 
 	}
 
+    /**
+     * Hide the login modal
+     * @memberOf GUIButtons
+	 * @access private
+     * @param  {Number} animSpeed Speed to animate at
+     */
 	function hideLogin(animSpeed) {
 
 		$('#login-modal').animate({
@@ -106,11 +139,16 @@ let GUIButtons = (function(window, undefined) {
 
 	}
 
+    /**
+     * Initialize some standard modal behavior
+     * @memberOf GUIButtons
+	 * @access private
+     */
 	function initModals() {
 
 		$(document).trigger('modalClosed')
 
-        // triggered
+		// triggered
 		$('.modal').on('hidden.bs.modal', function() {
 			$(document).trigger('modalClosed')
 		})
@@ -119,13 +157,18 @@ let GUIButtons = (function(window, undefined) {
 			$(document).trigger('modalOpened')
 		})
 
-        initLoginModal()
+		initLoginModal()
 
 	}
 
-    function initLoginModal() {
+    /**
+     * Initilize the login modal
+     * @memberOf GUIButtons
+	 * @access private
+     */
+	function initLoginModal() {
 
-        // open login modal
+		// open login modal
 		$('#button-login').click(function() {
 			showLogin(animSpeed)
 			if (formOnCreate) {
@@ -134,7 +177,7 @@ let GUIButtons = (function(window, undefined) {
 			}
 		})
 
-        // logout
+		// logout
 		$('#button-logout').click(function() {
 
 			let url = window.location.protocol + '//' + window.location.host
@@ -142,16 +185,21 @@ let GUIButtons = (function(window, undefined) {
 
 		})
 
-        // hide modal on click background
+		// hide modal on click background
 		$('#modal-background').click(function() {
 			hideLogin(animSpeed)
 		})
 
-    }
+	}
 
-    function initDownloadButtons() {
+    /**
+     * Initialize the download buttons
+     * @memberOf GUIButtons
+	 * @access private
+     */
+	function initDownloadButtons() {
 
-        // download obj
+		// download obj
 		$('#download-obj').click(function() {
 
 			exportVoxels()
@@ -164,7 +212,7 @@ let GUIButtons = (function(window, undefined) {
 
 		})
 
-        // download mtl
+		// download mtl
 		$('#download-mtl').click(function() {
 
 			exportVoxels()
@@ -177,7 +225,7 @@ let GUIButtons = (function(window, undefined) {
 
 		})
 
-        // download JSON
+		// download JSON
 		$('#download-json').click(function() {
 
 			let jsonBlob = new Blob([JSON.stringify(GameScene.getScene())], {
@@ -188,37 +236,41 @@ let GUIButtons = (function(window, undefined) {
 
 		})
 
-    }
+	}
 
+    /**
+     * Initialize the new project / show projects modals
+     * @memberOf GUIButtons
+	 * @access private
+     */
 	function initProjectModals() {
 
-        // open new project modal
+		// open new project modal
 		$('.new-project').click(function() {
 			$('#new-project-modal').modal()
 		})
 
-        $('#save-curr-project').click(function() {
-            SocketHandler.saveProject(User.getCurrentProject().name, function(err) {
-                if (err) {
-                    alert('Error: Project was not saved.')
-                    console.log(err)
-                }
-                else {
-                    alert('Project saved!')
-                    $('#save-curr-project').css('display', 'none')
-                    User.setProjectNeedsSave(false)
-                }
-            })
-        })
+		$('#save-curr-project').click(function() {
+			SocketHandler.saveProject(User.getCurrentProject().name, function(err) {
+				if (err) {
+					alert('Error: Project was not saved.')
+					console.log(err)
+				} else {
+					alert('Project saved!')
+					$('#save-curr-project').css('display', 'none')
+					User.setProjectNeedsSave(false)
+				}
+			})
+		})
 
-        // prompt user to name / save project
+		// prompt user to name / save project
 		$('#save-as-project').click(function() {
 
 			saveAsProject()
 
 		})
 
-        // attempt to create a new project
+		// attempt to create a new project
 		$('#new-project-form').submit(function(e) {
 
 			e.preventDefault()
@@ -235,7 +287,7 @@ let GUIButtons = (function(window, undefined) {
 			if (uname && uname !== 'Guest') {
 
 				SocketHandler.createProject(pjtName, voxels, function(err) {
-					let url = window.location.protocol +  '//' + window.location.host
+					let url = window.location.protocol + '//' + window.location.host
 					if (err) {
 
 						console.log(err)
@@ -252,8 +304,7 @@ let GUIButtons = (function(window, undefined) {
 							msg = 'Unknown.'
 
 						alert('Error: Project not created. ' + msg)
-					}
-					else {
+					} else {
 						console.log('Created project ' + pjtName)
 						window.location = url + '/user/' + uname + '/' + pjtName
 					}
@@ -264,21 +315,26 @@ let GUIButtons = (function(window, undefined) {
 			}
 		})
 
-        // load all user projects in project
-        // modal and open it
-		$('#user-projects').click(function () {
-		    SocketHandler.requestProjects(function(projects) {
+		// load all user projects in project
+		// modal and open it
+		$('#user-projects').click(function() {
+			SocketHandler.requestProjects(function(projects) {
 
-	            let modalBody = $('#projects-modal .modal-body')
-	            $(modalBody).children().remove()
+				let modalBody = $('#projects-modal .modal-body')
+				$(modalBody).children().remove()
 
 				let len = projects.length
 				let i = 0
-	            projects.forEach(function(project) {
+				projects.forEach(function(project) {
 
-	                let h5 = $('<h5>').html(project.name)
-					let open = $('<a>', { href: '/user/' + User.getUName() + '/' + project.name }).html('Open')
-					let del = $('<a>', { href: '/user/' + User.getUName() + '/delete/' + project.name, class: 'delete-proj' }).html('Delete')
+					let h5 = $('<h5>').html(project.name)
+					let open = $('<a>', {
+						href: '/user/' + User.getUName() + '/' + project.name
+					}).html('Open')
+					let del = $('<a>', {
+						href: '/user/' + User.getUName() + '/delete/' + project.name,
+						class: 'delete-proj'
+					}).html('Delete')
 					let hr = $('<hr>')
 
 					modalBody.append(h5)

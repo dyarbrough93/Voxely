@@ -17,12 +17,12 @@ let Raycast = function(window, undefined) {
      :: Public Methods
      *------------------------------------*/
 
-     /**
-      * Initializes the module. Must be called
-      * before anything else
-      * @memberOf Raycast
-      * @access public
-      */
+    /**
+     * Initializes the module. Must be called
+     * before anything else
+     * @memberOf Raycast
+     * @access public
+     */
     function init() {
         raycastArr = []
         raycaster = new THREE.Raycaster()
@@ -53,7 +53,6 @@ let Raycast = function(window, undefined) {
                 break
             }
         }
-
     }
 
     /**
