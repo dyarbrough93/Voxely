@@ -37,7 +37,7 @@
         "devw": "node server/generateClientFiles.js && set NODE_ENV=dev&& node app.js",
         "lint": "eslint .",
         "clean": "rm -rf build",
-        "jsdoc": "jsdoc ./server ./client ./README.md -r -a all -c ./jsdocconf.json -t ./node_modules/ink-docstrap/template -d jsdoc"
+        "jsdoc": "jsdoc ./server ./client ./README.md -r -a all -c ./jsdocconf.json -t ./node_modules/ink-docstrap/template -d documentation"
     },
     "author": "Davis Yarbrough",
     "license": "ISC",

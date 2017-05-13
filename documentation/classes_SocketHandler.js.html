@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width">
+	<title>Voxely Source: classes/SocketHandler.js</title>
+
+	<!--[if lt IE 9]>
+	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+	<![endif]-->
+	<link type="text/css" rel="stylesheet" href="styles/sunlight.default.css">
+
+	<link type="text/css" rel="stylesheet" href="styles/site.flatly.css">
+
+</head>
+
+<body>
+
+<div class="navbar navbar-default navbar-fixed-top navbar-inverse">
+<div class="container">
+	<div class="navbar-header">
+		<a class="navbar-brand" href="index.html">Voxely</a>
+		<button class="navbar-toggle" type="button" data-toggle="collapse" data-target="#topNavigation">
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+        </button>
+	</div>
+	<div class="navbar-collapse collapse" id="topNavigation">
+		<ul class="nav navbar-nav">
+			
+			<li class="dropdown">
+				<a href="namespaces.list.html" class="dropdown-toggle" data-toggle="dropdown">Namespaces<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="AdminGUI.html">AdminGUI</a></li><li><a href="GameScene.html">GameScene</a></li><li><a href="GUIButtons.html">GUIButtons</a></li><li><a href="GUIControlKit.html">GUIControlKit</a></li><li><a href="Keys.html">Keys</a></li><li><a href="Main.html">Main</a></li><li><a href="MapControls.html">MapControls</a></li><li><a href="Mouse.html">Mouse</a></li><li><a href="Raycast.html">Raycast</a></li><li><a href="SocketHandler.html">SocketHandler</a></li><li><a href="User.html">User</a></li><li><a href="Validation.html">Validation</a></li><li><a href="VoxelActions.html">VoxelActions</a></li><li><a href="VoxelUtils.html">VoxelUtils</a></li><li><a href="WorldData.html">WorldData</a></li>
+				</ul>
+			</li>
+			
+			<li class="dropdown">
+				<a href="classes.list.html" class="dropdown-toggle" data-toggle="dropdown">Classes<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="VoxelUtils.Tuple.html">VoxelUtils.Tuple</a></li>
+				</ul>
+			</li>
+			
+		</ul>
+        
+            <div class="col-sm-3 col-md-3">
+                <form class="navbar-form" role="search">
+                    <div class="input-group">
+                        <input type="text" class="form-control" placeholder="Search" name="q" id="search-input">
+                        <div class="input-group-btn">
+                            <button class="btn btn-default" id="search-submit"><i class="glyphicon glyphicon-search"></i></button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        
+	</div>
+
+</div>
+</div>
+
+
+<div class="container" id="toc-content">
+<div class="row">
+
+	
+	<div class="col-md-12">
+	
+		<div id="main">
+			
+
+		<h1 class="page-title">Source: classes/SocketHandler.js</h1>
+    
+<section>
+    <article>
+        <pre
+            class="sunlight-highlight-javascript linenums">'use strict'
+
+/**
+ * Manages socket events
+ * @namespace SocketHandler
+ */
+let SocketHandler = function(window, undefined) {
+
+	/*------------------------------------*
+	 :: Class Variables
+	 *------------------------------------*/
+
+	let socket
+
+	/*------------------------------------*
+	 :: Public Methods
+	 *------------------------------------*/
+
+	/**
+	 * Initializes the module. Must be called
+	 * before anything else
+	 * @memberOf SocketHandler
+	 * @access public
+	 */
+	function init() {
+
+		socket = io.connect()
+
+		initSocketOns()
+
+	}
+
+	/**
+	 * Tells the server to make a temporary
+	 * cache for some user data so it can
+	 * be recovered on page reload
+	 * @memberOf SocketHandler
+	 * @access public
+	 * @param  {string} uname Temp username (not yet confirmed registered)
+	 */
+	function cacheTempUser(uname) {
+
+		let voxels = WorldData.getVoxelsArr()
+		if (voxels.length)
+			socket.emit('cache temp user', uname, voxels)
+
+	}
+
+	/**
+	 * Get the list of projects for this
+	 * user from the server
+	 * @memberOf SocketHandler
+	 * @access public
+	 * @param  {Function} cb Callback to execute on completion
+	 */
+	function requestProjects(cb) {
+		socket.emit('get projects', cb)
+	}
+
+	/**
+	 * Save the project with the specified name
+	 * @memberOf SocketHandler
+	 * @access public
+	 * @param  {string}   pjtName Name of the project to save
+	 * @param  {Function} cb      Callback to execute on completion
+	 */
+	function saveProject(pjtName, cb) {
+		socket.emit('save project', pjtName, cb)
+	}
+
+	/**
+	 * Create a new project with the given
+	 * name / initial voxels
+	 * @memberOf SocketHandler
+	 * @access public
+	 * @param  {string} pjtName Name of the new project
+	 * @param  {Object[]} voxels  Array of voxels to add to the project
+	 * @param  {Function} cb      Callback to execute on completion
+	 */
+	function createProject(pjtName, voxels, cb) {
+		socket.emit('create project', pjtName, voxels, cb)
+	}
+
+	/**
+	 * Send a "block removed" socket emit
+	 * with the given grid position
+	 * @memberOf SocketHandler
+	 * @access public
+	 * @param  {VoxelUtils.GridVector3} gPos The grid
+	 * position of the voxel to remove
+	 * @param  {Function} cb Callback to call with
+	 * a boolean indicating success
+	 */
+	function emitBlockRemoved(gPos, cb) {
+
+		let project = User.getCurrentProject()
+		let pjtName = project ? project.name : 'guest'
+
+		socket.emit('block removed', {
+			x: gPos.x,
+			y: gPos.y,
+			z: gPos.z
+		}, pjtName, cb)
+
+	}
+
+	/**
+	 * Send a "block added" socket emit
+	 * with the given grid position and color
+	 * @memberOf SocketHandler
+	 * @access public
+	 * @param  {VoxelUtils.GridVector3} gPos The grid
+	 * position of the voxel to add
+	 * @param {string} hexString Hex color of the voxel
+	 * we are adding
+	 * @param  {Function} cb Callback to call with
+	 * a boolean indicating success
+	 */
+	function emitBlockAdded(gPos, hexString, cb) {
+
+		let project = User.getCurrentProject()
+		let pjtName = project ? project.name : 'guest'
+
+		socket.emit('block added', {
+			color: VoxelUtils.hexStringToDec(hexString),
+			position: {
+				x: gPos.x,
+				y: gPos.y,
+				z: gPos.z
+			}
+		}, pjtName, cb)
+
+	}
+
+	/**
+	 * Get the socket object
+	 * @return {Object} The socket
+	 * @memberOf SocketHandler
+	 * @access public
+	 */
+	function getSocket() {
+		return socket
+	}
+
+	/*------------------------------------*
+	 :: Private Methods
+	 *------------------------------------*/
+
+	/**
+	 * Initialize socket.on events
+	 * @memberOf SocketHandler
+	 * @access private
+	 */
+	function initSocketOns() {
+
+		socket.on('update clients', function(num) {
+			GUIControlKit.setConnectedClients(num)
+		})
+
+		socket.on('multiple logins', function() {
+
+			alert('You are already logged in!')
+			GameScene.removeCanvas()
+			GUIControlKit.destroy()
+
+		})
+
+		socket.on('block added', function(block) {
+
+			let pos = block.position
+
+			let gPos = new THREE.Vector3(pos.x, pos.y, pos.z).initGridPos()
+			let tColor = new THREE.Color(block.color)
+			let username = block.username
+
+			VoxelActions.createVoxelAtGridPos(gPos, '#' + tColor.getHexString(), username)
+
+			GameScene.render()
+
+		})
+
+		socket.on('block removed', function(pos) {
+
+			let gPos = new THREE.Vector3(pos.x, pos.y, pos.z).initGridPos()
+
+			VoxelActions.deleteVoxelAtGridPos(gPos)
+
+		})
+
+		socket.on('load temp cache', function(voxels) {
+			WorldData.loadIntoScene(voxels)
+			GameScene.render()
+			$('#save-as-project').css('display', 'block')
+			GUIButtons.saveAsProject()
+		})
+
+	}
+
+	/*********** expose public methods *************/
+
+	return {
+		init: init,
+		emitBlockAdded: emitBlockAdded,
+		emitBlockRemoved: emitBlockRemoved,
+		getSocket: getSocket,
+		requestProjects: requestProjects,
+		createProject: createProject,
+		saveProject: saveProject,
+		cacheTempUser: cacheTempUser
+	}
+
+}()
+</pre>
+    </article>
+</section>
+
+
+
+
+
+		</div>
+	</div>
+
+	<div class="clearfix"></div>
+
+	
+
+</div>
+</div>
+
+
+    <div class="modal fade" id="searchResults">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title">Search results</h4>
+          </div>
+          <div class="modal-body"></div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+          </div>
+        </div><!-- /.modal-content -->
+      </div><!-- /.modal-dialog -->
+    </div>
+
+
+<footer>
+
+
+<span class="jsdoc-message">
+	Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a>
+	
+		on Sat May 13th 2017
+	
+	using the <a href="https://github.com/docstrap/docstrap">DocStrap template</a>.
+</span>
+</footer>
+
+<script src="scripts/docstrap.lib.js"></script>
+<script src="scripts/toc.js"></script>
+
+    <script type="text/javascript" src="scripts/fulltext-search-ui.js"></script>
+
+
+<script>
+$( function () {
+	$( "[id*='$']" ).each( function () {
+		var $this = $( this );
+
+		$this.attr( "id", $this.attr( "id" ).replace( "$", "__" ) );
+	} );
+
+	$( ".tutorial-section pre, .readme-section pre, pre.prettyprint.source" ).each( function () {
+		var $this = $( this );
+
+		var example = $this.find( "code" );
+		exampleText = example.html();
+		var lang = /{@lang (.*?)}/.exec( exampleText );
+		if ( lang && lang[1] ) {
+			exampleText = exampleText.replace( lang[0], "" );
+			example.html( exampleText );
+			lang = lang[1];
+		} else {
+			var langClassMatch = example.parent()[0].className.match(/lang\-(\S+)/);
+			lang = langClassMatch ? langClassMatch[1] : "javascript";
+		}
+
+		if ( lang ) {
+
+			$this
+			.addClass( "sunlight-highlight-" + lang )
+			.addClass( "linenums" )
+			.html( example.html() );
+
+		}
+	} );
+
+	Sunlight.highlightAll( {
+		lineNumbers : true,
+		showMenu : true,
+		enableDoclinks : true
+	} );
+
+	$.catchAnchorLinks( {
+        navbarOffset: 10
+	} );
+	$( "#toc" ).toc( {
+		anchorName  : function ( i, heading, prefix ) {
+			return $( heading ).attr( "id" ) || ( prefix + i );
+		},
+		selectors   : "#toc-content h1,#toc-content h2,#toc-content h3,#toc-content h4",
+		showAndHide : false,
+		smoothScrolling: true
+	} );
+
+	$( "#main span[id^='toc']" ).addClass( "toc-shim" );
+	$( '.dropdown-toggle' ).dropdown();
+
+    $( "table" ).each( function () {
+      var $this = $( this );
+      $this.addClass('table');
+    } );
+
+} );
+</script>
+
+
+
+<!--Navigation and Symbol Display-->
+
+
+<!--Google Analytics-->
+
+
+
+    <script type="text/javascript">
+        $(document).ready(function() {
+            SearcherDisplay.init();
+        });
+    </script>
+
+
+</body>
+</html>

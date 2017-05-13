@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width">
+	<title>Voxely Source: classes/Admin.js</title>
+
+	<!--[if lt IE 9]>
+	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+	<![endif]-->
+	<link type="text/css" rel="stylesheet" href="styles/sunlight.default.css">
+
+	<link type="text/css" rel="stylesheet" href="styles/site.flatly.css">
+
+</head>
+
+<body>
+
+<div class="navbar navbar-default navbar-fixed-top navbar-inverse">
+<div class="container">
+	<div class="navbar-header">
+		<a class="navbar-brand" href="index.html">Voxely</a>
+		<button class="navbar-toggle" type="button" data-toggle="collapse" data-target="#topNavigation">
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+        </button>
+	</div>
+	<div class="navbar-collapse collapse" id="topNavigation">
+		<ul class="nav navbar-nav">
+			
+			<li class="dropdown">
+				<a href="namespaces.list.html" class="dropdown-toggle" data-toggle="dropdown">Namespaces<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="AdminGUI.html">AdminGUI</a></li><li><a href="GameScene.html">GameScene</a></li><li><a href="GUIButtons.html">GUIButtons</a></li><li><a href="GUIControlKit.html">GUIControlKit</a></li><li><a href="Keys.html">Keys</a></li><li><a href="Main.html">Main</a></li><li><a href="MapControls.html">MapControls</a></li><li><a href="Mouse.html">Mouse</a></li><li><a href="Raycast.html">Raycast</a></li><li><a href="SocketHandler.html">SocketHandler</a></li><li><a href="User.html">User</a></li><li><a href="Validation.html">Validation</a></li><li><a href="VoxelActions.html">VoxelActions</a></li><li><a href="VoxelUtils.html">VoxelUtils</a></li><li><a href="WorldData.html">WorldData</a></li>
+				</ul>
+			</li>
+			
+			<li class="dropdown">
+				<a href="classes.list.html" class="dropdown-toggle" data-toggle="dropdown">Classes<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="VoxelUtils.Tuple.html">VoxelUtils.Tuple</a></li>
+				</ul>
+			</li>
+			
+		</ul>
+        
+            <div class="col-sm-3 col-md-3">
+                <form class="navbar-form" role="search">
+                    <div class="input-group">
+                        <input type="text" class="form-control" placeholder="Search" name="q" id="search-input">
+                        <div class="input-group-btn">
+                            <button class="btn btn-default" id="search-submit"><i class="glyphicon glyphicon-search"></i></button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        
+	</div>
+
+</div>
+</div>
+
+
+<div class="container" id="toc-content">
+<div class="row">
+
+	
+	<div class="col-md-12">
+	
+		<div id="main">
+			
+
+		<h1 class="page-title">Source: classes/Admin.js</h1>
+    
+<section>
+    <article>
+        <pre
+            class="sunlight-highlight-javascript linenums">'use strict'
+
+/**
+ * @namespace AdminGUI
+ */
+let AdminGUI = function(window, undefined) {
+
+    let settings
+    let controlKit
+    let socket
+    let pos
+
+    let deletingRegion = false
+    let deletingRegionWithColor = false
+    let cleaningRegion = false
+    let deletingRegionWithUName = false
+
+    setTimeout(function init() {
+
+        document.addEventListener('mousedown', adminMouseDown)
+        pos = {}
+        socket = SocketHandler.getSocket()
+        settings = {
+            /*logWorldData: function() {
+                let worldData = WorldData.getWorldData()
+                for (let i = 0; i &lt; worldData.length; i++) {
+                    for (let j = 0; j &lt; worldData[i].length; j++) {
+                        for (let voxPos in worldData[i][j]) {
+                            console.log('voxPos: ' + voxPos)
+                        }
+                    }
+                }
+            }*/
+            deleteRegion: {
+                offText: 'Delete Region',
+                onText: 'Deleting'
+            },
+            deleteRegionWColor: {
+                offText: 'Delete Region w/ Color',
+                onText: 'Deleting Region w/ Color'
+            },
+            cleanRegion: {
+                offText: 'Clean Region',
+                onText: 'Cleaning Region'
+            },
+            deleteRegionWUName: {
+                offText: 'Delete Region with Username',
+                onText: 'Deleting Region with Username'
+            },
+            username: ''
+        }
+
+        controlKit = GUIControlKit.getControlKit()
+        initControlKit()
+
+        // don't know why we need this
+        $('#controlKit .panel').mousedown(function() {
+            GUIControlKit.setClicked(true)
+            // this has to be assigned here because
+            // some elements don't exist on page load
+            $('#controlKit *').mousedown(function() {
+                GUIControlKit.setClicked(true)
+            })
+
+        })
+
+    }, 400)
+
+    function initControlKit() {
+
+        let mainPanel = controlKit.addPanel({
+                label: 'Admin',
+                align: 'left',
+                width: 275,
+                fixed: false
+            })
+            .addButton(settings.deleteRegion.offText, function() {
+                toggleAdminControl('deleteRegion', true)
+                deletingRegion = true
+            })
+            .addButton(settings.deleteRegionWColor.offText, function() {
+                toggleAdminControl('deleteRegionWColor', true)
+                deletingRegionWithColor = true
+            })
+            .addButton(settings.cleanRegion.offText, function() {
+                toggleAdminControl('cleanRegion', true)
+                cleaningRegion = true
+            })
+            .addButton(settings.deleteRegionWUName.offText, function() {
+                toggleAdminControl('deleteRegionWUName', true)
+                deletingRegionWithUName = true
+            })
+            .addStringInput(settings, 'username', {
+                label: 'Username',
+                onChange: function() {
+                    console.log('onChange')
+                }
+            })
+
+    }
+
+    function toggleAdminControl(name, on) {
+        if (on) {
+            $('#controlKit [value="' + settings[name].offText + '"]').css('color', 'red')
+            $('#controlKit [value="' + settings[name].offText + '"]').val(settings[name].onText)
+        } else {
+            $('#controlKit [value="' + settings[name].onText + '"]').css('color', '')
+            $('#controlKit [value="' + settings[name].onText + '"]').val(settings[name].offText)
+        }
+    }
+
+    function adminMouseDown(e) {
+        if (User.stateIsHighlight()) return
+        if (e.which === 1) leftDown(e)
+    }
+
+    /**
+     * Handle a left mouse button
+     * down event
+     * @memberOf Mouse
+     * @access private
+     * @param  {Event} e
+     */
+    function leftDown(e) {
+
+        let intersect = Mouse.getMouseIntersects(e).closestIntx
+
+        if (intersect) {
+
+            if (deletingRegionWithUName || deletingRegion || deletingRegionWithColor || cleaningRegion) {
+
+                let p = intersect.point.clone().initWorldPos()
+                p.add(intersect.face.normal).worldToGrid()
+
+                let spssp = ((GUIControlKit.getSSSP() - 1) / 2)
+                let c1 = new THREE.Vector3(p.x - spssp, p.y, p.z - spssp).initGridPos()
+                let c2 = new THREE.Vector3(p.x + spssp, p.y, p.z + spssp).initGridPos()
+
+                let intxGPos = intersect.point.clone().initWorldPos()
+                intxGPos = intxGPos.add(intersect.face.normal).worldToGrid()
+
+                let particleSystem = GameScene.getPSystem()
+
+                let c1Sid = VoxelUtils.getSectionIndices(c1)
+                let c2Sid = VoxelUtils.getSectionIndices(c2)
+
+                let count = 0
+                let toRemove = []
+
+                let voxels = WorldData.getWorldData()
+
+                for (let x = c1Sid.a; x &lt;= c2Sid.a; x++) {
+                    for (let z = c1Sid.b; z &lt;= c2Sid.b; z++) {
+                        for (let voxPos in voxels[x][z]) {
+                            let gPos = VoxelUtils.coordStrParse(voxPos)
+                            if (gPos.x >= c1.x &amp;&amp; gPos.z >= c1.z &amp;&amp;
+                                gPos.x &lt;= c2.x &amp;&amp; gPos.z &lt;= c2.z) {
+
+                                if (deletingRegionWithColor) {
+                                    if (WorldData.getVoxel(gPos).hColor !== VoxelUtils.hexStringToDec(GUIControlKit.getBlockColor()))
+                                        continue
+                                }
+
+                                if (cleaningRegion) {
+                                    let sid = new VoxelUtils.Tuple(x, z)
+                                    if (touchingOwnColor(sid, gPos))
+                                        continue
+                                }
+
+                                if (deletingRegionWithUName) {
+                                    if (WorldData.getVoxel(gPos).username !== settings.username)
+                                        continue
+                                }
+
+                                toRemove.push(gPos)
+
+                                let sid = new VoxelUtils.Tuple(x, z)
+                                let vox = voxels[x][z][voxPos]
+                                let wPos = gPos.clone().gridToWorld()
+                                particleSystem.hidePixel(sid, vox.pIdx)
+                                WorldData.removeVoxel(gPos)
+                            }
+                        }
+                    }
+                }
+                if (toRemove.length > 0) {
+                    socket.emit('batch delete', toRemove, function(deletedVoxels) {
+                        console.log(`removed ${deletedVoxels.length} of ${toRemove.length} voxels.`)
+                    })
+                }
+
+                toggleAdminControl('deleteRegion', false)
+                toggleAdminControl('deleteRegionWColor', false)
+                toggleAdminControl('cleanRegion', false)
+                toggleAdminControl('deleteRegionWUName', false)
+
+                deletingRegion = false
+                deletingRegionWithColor = false
+                cleaningRegion = false
+                deletingRegionWithUName = false
+
+            }
+        }
+    }
+
+    function colorsMatch(gPos, color) {
+
+        var vox = WorldData.getVoxel(gPos)
+        return vox &amp;&amp; (parseInt(vox.hColor) === parseInt(color))
+
+    }
+
+    function touchingOwnColor(sid, gPos) {
+
+        var origVox = WorldData.getVoxel(gPos)
+        var color = origVox.hColor
+
+        for (var x = -1; x &lt;= 1; x++) {
+            for (var y = -1; y &lt;= 1; y++) {
+                for (var z = -1; z &lt;= 1; z++) {
+                    if (x === 0 &amp;&amp; y === 0 &amp;&amp; z === 0 || y &lt; 0) continue
+                    var posCheck = new THREE.Vector3(gPos.x + x, gPos.y + y, gPos.z + z)
+                    if (colorsMatch(posCheck, color)) return true
+                }
+            }
+        }
+
+        return false
+
+    }
+
+}(window)
+</pre>
+    </article>
+</section>
+
+
+
+
+
+		</div>
+	</div>
+
+	<div class="clearfix"></div>
+
+	
+
+</div>
+</div>
+
+
+    <div class="modal fade" id="searchResults">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title">Search results</h4>
+          </div>
+          <div class="modal-body"></div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+          </div>
+        </div><!-- /.modal-content -->
+      </div><!-- /.modal-dialog -->
+    </div>
+
+
+<footer>
+
+
+<span class="jsdoc-message">
+	Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a>
+	
+		on Sat May 13th 2017
+	
+	using the <a href="https://github.com/docstrap/docstrap">DocStrap template</a>.
+</span>
+</footer>
+
+<script src="scripts/docstrap.lib.js"></script>
+<script src="scripts/toc.js"></script>
+
+    <script type="text/javascript" src="scripts/fulltext-search-ui.js"></script>
+
+
+<script>
+$( function () {
+	$( "[id*='$']" ).each( function () {
+		var $this = $( this );
+
+		$this.attr( "id", $this.attr( "id" ).replace( "$", "__" ) );
+	} );
+
+	$( ".tutorial-section pre, .readme-section pre, pre.prettyprint.source" ).each( function () {
+		var $this = $( this );
+
+		var example = $this.find( "code" );
+		exampleText = example.html();
+		var lang = /{@lang (.*?)}/.exec( exampleText );
+		if ( lang && lang[1] ) {
+			exampleText = exampleText.replace( lang[0], "" );
+			example.html( exampleText );
+			lang = lang[1];
+		} else {
+			var langClassMatch = example.parent()[0].className.match(/lang\-(\S+)/);
+			lang = langClassMatch ? langClassMatch[1] : "javascript";
+		}
+
+		if ( lang ) {
+
+			$this
+			.addClass( "sunlight-highlight-" + lang )
+			.addClass( "linenums" )
+			.html( example.html() );
+
+		}
+	} );
+
+	Sunlight.highlightAll( {
+		lineNumbers : true,
+		showMenu : true,
+		enableDoclinks : true
+	} );
+
+	$.catchAnchorLinks( {
+        navbarOffset: 10
+	} );
+	$( "#toc" ).toc( {
+		anchorName  : function ( i, heading, prefix ) {
+			return $( heading ).attr( "id" ) || ( prefix + i );
+		},
+		selectors   : "#toc-content h1,#toc-content h2,#toc-content h3,#toc-content h4",
+		showAndHide : false,
+		smoothScrolling: true
+	} );
+
+	$( "#main span[id^='toc']" ).addClass( "toc-shim" );
+	$( '.dropdown-toggle' ).dropdown();
+
+    $( "table" ).each( function () {
+      var $this = $( this );
+      $this.addClass('table');
+    } );
+
+} );
+</script>
+
+
+
+<!--Navigation and Symbol Display-->
+
+
+<!--Google Analytics-->
+
+
+
+    <script type="text/javascript">
+        $(document).ready(function() {
+            SearcherDisplay.init();
+        });
+    </script>
+
+
+</body>
+</html>

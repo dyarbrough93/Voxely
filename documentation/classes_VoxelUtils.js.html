@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width">
+	<title>Voxely Source: classes/VoxelUtils.js</title>
+
+	<!--[if lt IE 9]>
+	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+	<![endif]-->
+	<link type="text/css" rel="stylesheet" href="styles/sunlight.default.css">
+
+	<link type="text/css" rel="stylesheet" href="styles/site.flatly.css">
+
+</head>
+
+<body>
+
+<div class="navbar navbar-default navbar-fixed-top navbar-inverse">
+<div class="container">
+	<div class="navbar-header">
+		<a class="navbar-brand" href="index.html">Voxely</a>
+		<button class="navbar-toggle" type="button" data-toggle="collapse" data-target="#topNavigation">
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+        </button>
+	</div>
+	<div class="navbar-collapse collapse" id="topNavigation">
+		<ul class="nav navbar-nav">
+			
+			<li class="dropdown">
+				<a href="namespaces.list.html" class="dropdown-toggle" data-toggle="dropdown">Namespaces<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="AdminGUI.html">AdminGUI</a></li><li><a href="GameScene.html">GameScene</a></li><li><a href="GUIButtons.html">GUIButtons</a></li><li><a href="GUIControlKit.html">GUIControlKit</a></li><li><a href="Keys.html">Keys</a></li><li><a href="Main.html">Main</a></li><li><a href="MapControls.html">MapControls</a></li><li><a href="Mouse.html">Mouse</a></li><li><a href="Raycast.html">Raycast</a></li><li><a href="SocketHandler.html">SocketHandler</a></li><li><a href="User.html">User</a></li><li><a href="Validation.html">Validation</a></li><li><a href="VoxelActions.html">VoxelActions</a></li><li><a href="VoxelUtils.html">VoxelUtils</a></li><li><a href="WorldData.html">WorldData</a></li>
+				</ul>
+			</li>
+			
+			<li class="dropdown">
+				<a href="classes.list.html" class="dropdown-toggle" data-toggle="dropdown">Classes<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="VoxelUtils.Tuple.html">VoxelUtils.Tuple</a></li>
+				</ul>
+			</li>
+			
+		</ul>
+        
+            <div class="col-sm-3 col-md-3">
+                <form class="navbar-form" role="search">
+                    <div class="input-group">
+                        <input type="text" class="form-control" placeholder="Search" name="q" id="search-input">
+                        <div class="input-group-btn">
+                            <button class="btn btn-default" id="search-submit"><i class="glyphicon glyphicon-search"></i></button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        
+	</div>
+
+</div>
+</div>
+
+
+<div class="container" id="toc-content">
+<div class="row">
+
+	
+	<div class="col-md-12">
+	
+		<div id="main">
+			
+
+		<h1 class="page-title">Source: classes/VoxelUtils.js</h1>
+    
+<section>
+    <article>
+        <pre
+            class="sunlight-highlight-javascript linenums">'use strict'
+
+/**
+ * Contains a number of utility functions for working with voxels
+ * @namespace VoxelUtils
+ */
+let VoxelUtils = (function(window, undefined) {
+
+    /**
+     * A coordinate string defining the grid position of a voxel.
+     * Formatted as "x[-]{0,1}[0-9]+y[-]{0,1}[0-9]+z[-]{0,1}[0-9]+".
+     * So "x-12y3z15" (x: -12, y: 3, z: 15) would be a valid example.
+     * @memberOf VoxelUtils
+     * @typedef {string} coordStr
+     */
+
+    /**
+     * A THREE.Vector3 that represents a grid coordinate. Can
+     * be initialized with "new THREE.Vector3().initGridPos()",
+     * or by calling "vec3.worldToGrid()".
+     * @memberOf VoxelUtils
+     * @typedef {THREE.Vector3} GridVector3
+     */
+
+    /**
+     * A THREE.Vector3 that represents a world coordinate. Can
+     * be initialized with "new THREE.Vector3().initWorldPos()",
+     * or by calling "vec3.gridToWorld()".
+     * @memberOf VoxelUtils
+     * @typedef {THREE.Vector3} WorldVector3
+     */
+
+    /*------------------------------------*
+     :: Public methods
+     *------------------------------------*/
+
+     /**
+      * Check if a string is propery formatted as a VoxelUtils.coordStr
+      * @memberOf VoxelUtils
+      * @access public
+      * @return {boolean}
+      */
+    String.prototype.isCoordStr = function() {
+        let formatReg = /x[-]*\d+y[-]*\d+z[-]*\d+/
+        return !!formatReg.exec(this)
+    }
+
+    /**
+     * Get a hash hex string ('#1f3c5d86') from a THREE.Color
+     * @memberOf VoxelUtils
+     * @access public
+     * @return {string} The hash hex string
+     */
+    THREE.Color.prototype.getHashHexString = function() {
+        return '#' + this.getHexString()
+    }
+
+    /**
+     * Sets a THREE.Vector3's values to the
+     * center of the closest world "anchor". I.e. the position
+     * that would be used to set the world coordinates of a
+     * voxel at that location (multiples of 50 for x and z,
+     * (multiples of 50) + 25 for y).
+     * @memberOf VoxelUtils
+     * @access public
+     */
+    THREE.Vector3.prototype.snapToGrid = function() {
+
+        this.worldToGrid()
+        this.gridToWorld()
+
+    }
+
+    /**
+     * Converts a THREE.Vector3's values from world
+     * coordinates to grid coordinates.
+     * @memberOf VoxelUtils
+     * @access public
+     */
+    THREE.Vector3.prototype.worldToGrid = function() {
+
+        let blockSize = Config.getGrid().blockSize
+
+        this.divideScalar(blockSize)
+
+        this.setComponent(0, Math.round(this.x))
+        this.setComponent(1, Math.floor(this.y))
+        this.setComponent(2, Math.round(this.z))
+
+        this.isGridPos = true
+        this.isWorldPos = false
+
+        return this
+
+    }
+
+    /**
+     * Converts a THREE.Vector3's values from grid
+     * coordinates to world coordinates.
+     * @memberOf VoxelUtils
+     */
+    THREE.Vector3.prototype.gridToWorld = function() {
+
+        let blockSize = Config.getGrid().blockSize
+
+        this.multiplyScalar(blockSize)
+        this.setComponent(1, this.y + 25)
+
+        this.isWorldPos = true
+        this.isGridPos = false
+
+        return this
+
+    }
+
+    /**
+     * Marks this vector as a grid position (game coordinates).
+     * @memberOf VoxelUtils
+     * @access public
+     * @returns {VoxelUtils.GridVector3} This object
+     */
+    THREE.Vector3.prototype.initGridPos = function() {
+        this.isGridPos = true
+        return this
+    }
+
+    /**
+     * Marks this vector as a world position (scene coordinates).
+     * @memberOf VoxelUtils
+     * @access public
+     * @returns {VoxelUtils.WorldVector3} This object
+     */
+    THREE.Vector3.prototype.initWorldPos = function() {
+        this.isWorldPos = true
+        return this
+    }
+
+    /**
+     * Tuple object.
+     * @memberOf VoxelUtils
+     * @access public
+     * @class Tuple
+     * @type {object}
+     * @property {number} a First value
+     * @property {number} b Second value
+     */
+    function Tuple(a, b) {
+        return {
+            a: a,
+            b: b,
+            /**
+             * Checks is this is valid tuple.
+             * For validation
+             * @instance
+             * @memberOf VoxelUtils.Tuple
+             * @method isValidTuple
+             */
+            isValidTuple: function() {
+                return typeof this.a === 'number' &amp;&amp;
+                    typeof this.b === 'number'
+            }
+        }
+    }
+
+    /**
+     * Takes a coordinate string, parses it and returns
+     * it as a THREE.Vector3.
+     *
+     * @memberOf VoxelUtils
+     * @access public
+     * @param {VoxelUtils.coordStr} coordStr Coordinate string representing
+     * a grid position
+     * @returns {THREE.Vector3} Parsed position vector
+     */
+    function coordStrParse(coordStr) {
+
+        let xreg = /x[-]*\d+/,
+            yreg = /y[-]*\d+/,
+            zreg = /z[-]*\d+/
+
+        let pos = {
+            x: parseInt(xreg.exec(coordStr)[0].slice(1)),
+            y: parseInt(yreg.exec(coordStr)[0].slice(1)),
+            z: parseInt(zreg.exec(coordStr)[0].slice(1))
+        }
+
+        return new THREE.Vector3(pos.x, pos.y, pos.z).initGridPos()
+
+    }
+
+    /**
+     * Takes a THREE.Vector3 and converts it to a coordinate
+     * string.
+     *
+     * @memberOf VoxelUtils
+     * @access public
+     * @param {VoxelUtils.GridVector3} gPos Position in grid coordinates
+     * @returns {VoxelUtils.coordStr} Grid coordinate string
+     */
+    function getCoordStr(gPos) {
+
+        return "x" + gPos.x + "y" + gPos.y + "z" + gPos.z
+    }
+
+    /**
+     * Check if the given position is within
+     * the global height limit
+     * @memberOf VoxelUtils
+     * @access public
+     * @param  {VoxelUtils.GridVector3} gPos The position
+     * @return {boolean}
+     */
+    function validHeight(gPos) {
+
+        // too high?
+        if (gPos.y >= Config.get().maxVoxelHeight) {
+
+            if (!Keys.shiftDown() &amp;&amp; !User.stateIsPick()) {
+                alert('Max height reached.')
+                return false
+            }
+
+        }
+
+        // too low?
+        if (gPos.y &lt; 0) return false
+
+        return true
+
+    }
+
+    /**
+     * Check if the given position is both
+     * within the selection bounds and less
+     * than the global height limit
+     * @memberOf VoxelUtils
+     * @access public
+     * @param  {VoxelUtils.GridVector3} gPos The position
+     * we are checking
+     * @return {boolean}
+     */
+    function validBlockLocation(gPos) {
+        return validHeight(gPos) &amp;&amp; withinGridBoundaries(gPos)
+    }
+
+    /**
+     * Checks if a position is within
+     * the boundaries of the grid
+     * @memberOf VoxelUtils
+     * @access public
+     * @param  {VoxelUtils.GridVector3} gPos The grid position
+     * @return {boolean}
+     */
+    function withinGridBoundaries(gPos) {
+
+        let spsg = GUIControlKit.getWorkspaceSize()
+
+        let minxz = -(spsg / 2)
+        let maxxz = spsg / 2
+
+        return (gPos.x >= minxz &amp;&amp;
+            gPos.z >= minxz &amp;&amp;
+            gPos.x &lt;= maxxz &amp;&amp;
+            gPos.z &lt;= maxxz)
+
+    }
+
+    /**
+     * Initializes a voxel mesh with the specified position
+     * @memberOf VoxelUtils.
+     * @memberOf VoxelUtils
+     * @access public
+     * @param {object} args  Voxel parameters
+     * @param {GridVector3} args.gPos Grid position
+     * @param {number} args.color Hex color
+     * @return {THREE.Mesh} The threejs voxel mesh
+     */
+    function initVoxel(args) {
+
+        let blockSize = Config.getGrid().blockSize
+
+        let wPos = args.gPos.clone()
+        wPos.gridToWorld()
+
+        let geom = new THREE.BoxGeometry(blockSize, blockSize, blockSize),
+            material = new THREE.MeshLambertMaterial({
+                color: args.color
+            })
+
+        let mesh = new THREE.Mesh(geom, material)
+        mesh.castShadow = true
+
+        mesh.name = 'voxel'
+        mesh.position.set(wPos.x, wPos.y, wPos.z)
+        mesh.updateMatrix()
+
+        return mesh
+
+    }
+
+    /**
+     * Counts the number of root attributes in an
+     * object.
+     *
+     * @memberOf VoxelUtils
+     * @access public
+     * @param {object} obj The object
+     * @returns {number}
+     */
+    function countObjAttrs(obj) {
+        let num = 0
+        for (let attr in obj) {
+            num++
+        }
+        return num
+    }
+
+    /**
+     * Get the grid position from an intersect
+     * @memberOf VoxelUtils
+     * @access public
+     * @param  {THREE.Intersect} intersect The intersect
+     * @return {VoxelUtils.GridVector3} Grid position, null on none
+     */
+    function getGridPositionFromIntersect(intersect) {
+
+        let gPos
+        let iobj = intersect.object
+
+        if (iobj.name !== 'plane') {
+
+            if (iobj.name === 'voxel') {
+
+                gPos = iobj.position.clone()
+                gPos.initWorldPos()
+                gPos.worldToGrid()
+
+            } else {
+
+                gPos = (intersect.point).clone().sub(intersect.face.normal)
+                gPos.worldToGrid()
+
+            }
+
+            return gPos
+
+        }
+
+        return null
+
+    }
+
+    /**
+     * Convert a hexadecimal string to decimal
+     * @memberOf VoxelUtils
+     * @access public
+     * @param  {string} hexString The hex string
+     * @return {number} The decimal value
+     */
+    function hexStringToDec(hexString) {
+        return parseInt(hexString.substring(1), 16)
+    }
+
+    /**
+     * Convert a hexadecimal string to RGB
+     * @memberOf VoxelUtils
+     * @access public
+     * @param  {string} hexString The hex string
+     * @return {Object} RGB object
+     */
+    function hexStringToRgb(hexString) {
+
+        let hs = hexString.charAt(0) === '#' ? hexString.substring(1) : hexString
+
+        return {
+            r: parseInt(hs.substring(0, 2), 16) / 255,
+            g: parseInt(hs.substring(2, 4), 16) / 255,
+            b: parseInt(hs.substring(4, 6), 16) / 255
+        }
+
+    }
+
+    /*********** expose public methods *************/
+
+    return {
+        withinGridBoundaries: withinGridBoundaries,
+        validBlockLocation: validBlockLocation,
+        coordStrParse: coordStrParse,
+        hexStringToRgb: hexStringToRgb,
+        getCoordStr: getCoordStr,
+        initVoxel: initVoxel,
+        countObjAttrs: countObjAttrs,
+        Tuple: Tuple,
+        buildOutlineGeom: buildOutlineGeom,
+        hexStringToDec: hexStringToDec,
+        getGridPositionFromIntersect: getGridPositionFromIntersect
+
+    }
+
+})(window)
+</pre>
+    </article>
+</section>
+
+
+
+
+
+		</div>
+	</div>
+
+	<div class="clearfix"></div>
+
+	
+
+</div>
+</div>
+
+
+    <div class="modal fade" id="searchResults">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title">Search results</h4>
+          </div>
+          <div class="modal-body"></div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+          </div>
+        </div><!-- /.modal-content -->
+      </div><!-- /.modal-dialog -->
+    </div>
+
+
+<footer>
+
+
+<span class="jsdoc-message">
+	Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a>
+	
+		on Sat May 13th 2017
+	
+	using the <a href="https://github.com/docstrap/docstrap">DocStrap template</a>.
+</span>
+</footer>
+
+<script src="scripts/docstrap.lib.js"></script>
+<script src="scripts/toc.js"></script>
+
+    <script type="text/javascript" src="scripts/fulltext-search-ui.js"></script>
+
+
+<script>
+$( function () {
+	$( "[id*='$']" ).each( function () {
+		var $this = $( this );
+
+		$this.attr( "id", $this.attr( "id" ).replace( "$", "__" ) );
+	} );
+
+	$( ".tutorial-section pre, .readme-section pre, pre.prettyprint.source" ).each( function () {
+		var $this = $( this );
+
+		var example = $this.find( "code" );
+		exampleText = example.html();
+		var lang = /{@lang (.*?)}/.exec( exampleText );
+		if ( lang && lang[1] ) {
+			exampleText = exampleText.replace( lang[0], "" );
+			example.html( exampleText );
+			lang = lang[1];
+		} else {
+			var langClassMatch = example.parent()[0].className.match(/lang\-(\S+)/);
+			lang = langClassMatch ? langClassMatch[1] : "javascript";
+		}
+
+		if ( lang ) {
+
+			$this
+			.addClass( "sunlight-highlight-" + lang )
+			.addClass( "linenums" )
+			.html( example.html() );
+
+		}
+	} );
+
+	Sunlight.highlightAll( {
+		lineNumbers : true,
+		showMenu : true,
+		enableDoclinks : true
+	} );
+
+	$.catchAnchorLinks( {
+        navbarOffset: 10
+	} );
+	$( "#toc" ).toc( {
+		anchorName  : function ( i, heading, prefix ) {
+			return $( heading ).attr( "id" ) || ( prefix + i );
+		},
+		selectors   : "#toc-content h1,#toc-content h2,#toc-content h3,#toc-content h4",
+		showAndHide : false,
+		smoothScrolling: true
+	} );
+
+	$( "#main span[id^='toc']" ).addClass( "toc-shim" );
+	$( '.dropdown-toggle' ).dropdown();
+
+    $( "table" ).each( function () {
+      var $this = $( this );
+      $this.addClass('table');
+    } );
+
+} );
+</script>
+
+
+
+<!--Navigation and Symbol Display-->
+
+
+<!--Google Analytics-->
+
+
+
+    <script type="text/javascript">
+        $(document).ready(function() {
+            SearcherDisplay.init();
+        });
+    </script>
+
+
+</body>
+</html>
