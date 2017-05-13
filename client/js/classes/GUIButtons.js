@@ -290,23 +290,23 @@ let GUIButtons = (function(window, undefined) {
 
 					i++
 
-	            })
+				})
 
 				$('#projects-modal').modal()
 
-		    })
-		})
-
-        // confirm proj delete
-		$('.delete-proj').click(function() {
-			confirm('ta') // @TODO: make this work
-			console.log('elete')
+                // confirm proj delete
+        		$('.delete-proj').click(function(e) {
+        			if (!confirm('Are you sure you wan\'t to delete this project?')) {
+                        e.preventDefault()
+                    }
+        		})
+			})
 		})
 	}
 
-    return {
-        init: init,
-        saveAsProject: saveAsProject
-    }
+	return {
+		init: init,
+		saveAsProject: saveAsProject
+	}
 
 })(window)
