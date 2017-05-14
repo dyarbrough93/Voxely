@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width">
+	<title>Voxely Source: classes/User.js</title>
+
+	<!--[if lt IE 9]>
+	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+	<![endif]-->
+	<link type="text/css" rel="stylesheet" href="styles/sunlight.default.css">
+
+	<link type="text/css" rel="stylesheet" href="styles/site.flatly.css">
+
+</head>
+
+<body>
+
+<div class="navbar navbar-default navbar-fixed-top navbar-inverse">
+<div class="container">
+	<div class="navbar-header">
+		<a class="navbar-brand" href="index.html">Voxely</a>
+		<button class="navbar-toggle" type="button" data-toggle="collapse" data-target="#topNavigation">
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+        </button>
+	</div>
+	<div class="navbar-collapse collapse" id="topNavigation">
+		<ul class="nav navbar-nav">
+			
+			<li class="dropdown">
+				<a href="namespaces.list.html" class="dropdown-toggle" data-toggle="dropdown">Namespaces<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="AdminGUI.html">AdminGUI</a></li><li><a href="GameScene.html">GameScene</a></li><li><a href="GUIButtons.html">GUIButtons</a></li><li><a href="GUIControlKit.html">GUIControlKit</a></li><li><a href="Keys.html">Keys</a></li><li><a href="Main.html">Main</a></li><li><a href="MapControls.html">MapControls</a></li><li><a href="Mouse.html">Mouse</a></li><li><a href="Raycast.html">Raycast</a></li><li><a href="SocketHandler.html">SocketHandler</a></li><li><a href="User.html">User</a></li><li><a href="Validation.html">Validation</a></li><li><a href="VoxelActions.html">VoxelActions</a></li><li><a href="VoxelUtils.html">VoxelUtils</a></li><li><a href="WorldData.html">WorldData</a></li>
+				</ul>
+			</li>
+			
+			<li class="dropdown">
+				<a href="classes.list.html" class="dropdown-toggle" data-toggle="dropdown">Classes<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="VoxelUtils.Tuple.html">VoxelUtils.Tuple</a></li>
+				</ul>
+			</li>
+			
+		</ul>
+        
+            <div class="col-sm-3 col-md-3">
+                <form class="navbar-form" role="search">
+                    <div class="input-group">
+                        <input type="text" class="form-control" placeholder="Search" name="q" id="search-input">
+                        <div class="input-group-btn">
+                            <button class="btn btn-default" id="search-submit"><i class="glyphicon glyphicon-search"></i></button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        
+	</div>
+
+</div>
+</div>
+
+
+<div class="container" id="toc-content">
+<div class="row">
+
+	
+	<div class="col-md-12">
+	
+		<div id="main">
+			
+
+		<h1 class="page-title">Source: classes/User.js</h1>
+    
+<section>
+    <article>
+        <pre
+            class="sunlight-highlight-javascript linenums">'use strict'
+
+/**
+ * Manages and stores information on the user
+ * and user state
+ * @namespace User
+ */
+let User = function(window, undefined) {
+
+    /*------------------------------------*
+     :: Class Variables
+     *------------------------------------*/
+
+    let states
+    let state
+    let actionTimer
+    let currentHoveredUser
+    let actionDelay
+    let currentProject
+    let projNeedsSave
+
+    /*------------------------------------*
+     :: Public Methods
+     *------------------------------------*/
+
+    /**
+     * Initializes the module. Must be called
+     * before anything else
+     * @memberOf User
+     * @access public
+     */
+    function init() {
+
+        states = {
+            DEFAULT: 0,
+            PICKCOLOR: 1
+        }
+
+        setDefaultState()
+
+        actionDelay = Config.getGeneral().actionDelay
+
+        // from editor.nunjucks
+        currentProject = njProject
+
+        projNeedsSave = false
+
+        let now = Date.now()
+        actionTimer = new Date(now - actionDelay)
+
+    }
+
+    /**
+     * Reset the action timer to delay
+     * actions again
+     * @memberOf User
+     * @access public
+     */
+    function resetActionTimer() {
+        actionTimer = new Date()
+    }
+
+    /**
+     * Checks if the user can act
+     * based on the actionDelay config
+     * setting and the last time acted
+     * @memberOf User
+     * @access public
+     * @return {boolean}
+     */
+    function canAct() {
+        let msSinceAct = new Date(new Date() - actionTimer).getTime()
+        return msSinceAct > actionDelay
+    }
+
+    /*********** setters *************/
+
+    /**
+     * Set the user state to default
+     * @memberOf User
+     * @access public
+     */
+    function setDefaultState() {
+        state = states.DEFAULT
+        $('body').css('cursor', 'url(/img/default.cur), auto')
+    }
+
+    /**
+     * Set the user state to PICKCOLOR
+     * @memberOf User
+     * @access public
+     */
+    function setPickState() {
+        state = states.PICKCOLOR
+        $('body').css('cursor', 'url(/img/picker.cur), auto')
+    }
+
+    function setProjectNeedsSave(val) {
+        projNeedsSave = val
+    }
+
+    /*********** getters *************/
+
+    function getCurrentProject() {
+        return currentProject
+    }
+
+    function getUName() {
+        let username = $('#user #username').html()
+        if (!username) username = 'Guest'
+        let res = /[a-zA-Z0-9_]+/.exec(username)
+        if (res) username = res[0]
+        return username
+    }
+
+    function getCurrentHoveredUser() {
+        return currentHoveredUser
+    }
+
+    function getActionDelay() {
+        return actionDelay
+    }
+
+    function projectNeedsSave() {
+        return projNeedsSave
+    }
+
+    function stateIsPick() {
+        return state === states.PICKCOLOR
+    }
+
+    function stateIsDefault() {
+        return state === states.DEFAULT
+    }
+
+    /*********** expose public methods *************/
+
+    return {
+        init: init,
+        canAct: canAct,
+        getUName: getUName,
+        resetActionTimer: resetActionTimer,
+        stateIsPick: stateIsPick,
+        stateIsDefault: stateIsDefault,
+        setDefaultState: setDefaultState,
+        setPickState: setPickState,
+        getCurrentHoveredUser: getCurrentHoveredUser,
+        getActionDelay: getActionDelay,
+        getCurrentProject: getCurrentProject,
+        projectNeedsSave: projectNeedsSave,
+        setProjectNeedsSave: setProjectNeedsSave
+    }
+
+}(window)
+</pre>
+    </article>
+</section>
+
+
+
+
+
+		</div>
+	</div>
+
+	<div class="clearfix"></div>
+
+	
+
+</div>
+</div>
+
+
+    <div class="modal fade" id="searchResults">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title">Search results</h4>
+          </div>
+          <div class="modal-body"></div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+          </div>
+        </div><!-- /.modal-content -->
+      </div><!-- /.modal-dialog -->
+    </div>
+
+
+<footer>
+
+
+<span class="jsdoc-message">
+	Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a>
+	
+		on Sat May 13th 2017
+	
+	using the <a href="https://github.com/docstrap/docstrap">DocStrap template</a>.
+</span>
+</footer>
+
+<script src="scripts/docstrap.lib.js"></script>
+<script src="scripts/toc.js"></script>
+
+    <script type="text/javascript" src="scripts/fulltext-search-ui.js"></script>
+
+
+<script>
+$( function () {
+	$( "[id*='$']" ).each( function () {
+		var $this = $( this );
+
+		$this.attr( "id", $this.attr( "id" ).replace( "$", "__" ) );
+	} );
+
+	$( ".tutorial-section pre, .readme-section pre, pre.prettyprint.source" ).each( function () {
+		var $this = $( this );
+
+		var example = $this.find( "code" );
+		exampleText = example.html();
+		var lang = /{@lang (.*?)}/.exec( exampleText );
+		if ( lang && lang[1] ) {
+			exampleText = exampleText.replace( lang[0], "" );
+			example.html( exampleText );
+			lang = lang[1];
+		} else {
+			var langClassMatch = example.parent()[0].className.match(/lang\-(\S+)/);
+			lang = langClassMatch ? langClassMatch[1] : "javascript";
+		}
+
+		if ( lang ) {
+
+			$this
+			.addClass( "sunlight-highlight-" + lang )
+			.addClass( "linenums" )
+			.html( example.html() );
+
+		}
+	} );
+
+	Sunlight.highlightAll( {
+		lineNumbers : true,
+		showMenu : true,
+		enableDoclinks : true
+	} );
+
+	$.catchAnchorLinks( {
+        navbarOffset: 10
+	} );
+	$( "#toc" ).toc( {
+		anchorName  : function ( i, heading, prefix ) {
+			return $( heading ).attr( "id" ) || ( prefix + i );
+		},
+		selectors   : "#toc-content h1,#toc-content h2,#toc-content h3,#toc-content h4",
+		showAndHide : false,
+		smoothScrolling: true
+	} );
+
+	$( "#main span[id^='toc']" ).addClass( "toc-shim" );
+	$( '.dropdown-toggle' ).dropdown();
+
+    $( "table" ).each( function () {
+      var $this = $( this );
+      $this.addClass('table');
+    } );
+
+} );
+</script>
+
+
+
+<!--Navigation and Symbol Display-->
+
+
+<!--Google Analytics-->
+
+
+
+    <script type="text/javascript">
+        $(document).ready(function() {
+            SearcherDisplay.init();
+        });
+    </script>
+
+
+</body>
+</html>

@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width">
+	<title>Voxely Source: classes/WorldData.js</title>
+
+	<!--[if lt IE 9]>
+	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+	<![endif]-->
+	<link type="text/css" rel="stylesheet" href="styles/sunlight.default.css">
+
+	<link type="text/css" rel="stylesheet" href="styles/site.flatly.css">
+
+</head>
+
+<body>
+
+<div class="navbar navbar-default navbar-fixed-top navbar-inverse">
+<div class="container">
+	<div class="navbar-header">
+		<a class="navbar-brand" href="index.html">Voxely</a>
+		<button class="navbar-toggle" type="button" data-toggle="collapse" data-target="#topNavigation">
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+        </button>
+	</div>
+	<div class="navbar-collapse collapse" id="topNavigation">
+		<ul class="nav navbar-nav">
+			
+			<li class="dropdown">
+				<a href="namespaces.list.html" class="dropdown-toggle" data-toggle="dropdown">Namespaces<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="AdminGUI.html">AdminGUI</a></li><li><a href="GameScene.html">GameScene</a></li><li><a href="GUIButtons.html">GUIButtons</a></li><li><a href="GUIControlKit.html">GUIControlKit</a></li><li><a href="Keys.html">Keys</a></li><li><a href="Main.html">Main</a></li><li><a href="MapControls.html">MapControls</a></li><li><a href="Mouse.html">Mouse</a></li><li><a href="Raycast.html">Raycast</a></li><li><a href="SocketHandler.html">SocketHandler</a></li><li><a href="User.html">User</a></li><li><a href="Validation.html">Validation</a></li><li><a href="VoxelActions.html">VoxelActions</a></li><li><a href="VoxelUtils.html">VoxelUtils</a></li><li><a href="WorldData.html">WorldData</a></li>
+				</ul>
+			</li>
+			
+			<li class="dropdown">
+				<a href="classes.list.html" class="dropdown-toggle" data-toggle="dropdown">Classes<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="VoxelUtils.Tuple.html">VoxelUtils.Tuple</a></li>
+				</ul>
+			</li>
+			
+		</ul>
+        
+            <div class="col-sm-3 col-md-3">
+                <form class="navbar-form" role="search">
+                    <div class="input-group">
+                        <input type="text" class="form-control" placeholder="Search" name="q" id="search-input">
+                        <div class="input-group-btn">
+                            <button class="btn btn-default" id="search-submit"><i class="glyphicon glyphicon-search"></i></button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        
+	</div>
+
+</div>
+</div>
+
+
+<div class="container" id="toc-content">
+<div class="row">
+
+	
+	<div class="col-md-12">
+	
+		<div id="main">
+			
+
+		<h1 class="page-title">Source: classes/WorldData.js</h1>
+    
+<section>
+    <article>
+        <pre
+            class="sunlight-highlight-javascript linenums">'use strict'
+
+/**
+ * Manages the world state (location and
+ * color of all voxels)
+ * @namespace WorldData
+ */
+let WorldData = function(window, undefined) {
+
+	/**
+	 * An object containing information on all of the
+	 * voxels currently in the world, where keys are
+	 * {@link VoxelUtils.coordStr} and values can be either
+	 * a THREE.Mesh (a newly placed voxel) or a {@link WorldData.VoxelInfo}
+	 * The structure looks like this:
+	 *&lt;pre>&lt;code>
+	 * {
+	 *     'x12y10z-5': {@link WorldData.VoxelInfo}
+	 *     'x-5y4z3': {@link WorldData.VoxelInfo}
+	 *     'x7y1z8': {THREE.Mesh}
+	 * }
+	 *&lt;/code>&lt;/pre>
+	 * @memberOf WorldData
+	 * @typedef {Object} worldData
+	 */
+
+	/*------------------------------------*
+	 :: Class Variables
+	 *------------------------------------*/
+
+	let worldData
+
+	/*------------------------------------*
+	 :: Public Methods
+	 *------------------------------------*/
+
+	/**
+	 * Initializes the module. Must be called
+	 * before anything else
+	 * @memberOf WorldData
+	 * @access public
+	 */
+	function init() {
+
+		let secPerSide = Config.getGrid().sectionsPerSide
+
+		worldData = {}
+
+	}
+
+	/**
+	 * Load all of the world data into the scene
+	 * @memberOf WorldData
+	 * @access public
+	 * @param {object} data Contains all of the data
+	 * to load in, retrieved via the SocketHandler
+	 */
+	function loadIntoScene(data) {
+
+		console.log('loading voxels into scene ...')
+
+		;
+		(function initVoxels() {
+
+			data.forEach(function(voxel) {
+
+				if (VoxelUtils.validBlockLocation(voxel.position)) {
+
+					let vPos = voxel.position
+					let gPos = new THREE.Vector3(vPos.x, vPos.y, vPos.z).initGridPos()
+
+					let hColor = voxel.color
+					let tColor = new THREE.Color(hColor)
+
+					VoxelActions.createVoxelAtGridPos(gPos, '#' + tColor.getHexString())
+
+				}
+
+			})
+
+		}())
+
+		console.log('done loading voxels')
+
+		GameScene.render()
+
+	}
+
+	/**
+	 * Get the voxels currently in the scene as an array
+	 * @memberOf WorldData
+	 * @access public
+	 * @return {Object[]} Array of voxels
+	 */
+	function getVoxelsArr() {
+
+		let voxelsArr = []
+
+		for (let coordStr in worldData) {
+			if (worldData.hasOwnProperty(coordStr)) {
+				let gPos = VoxelUtils.coordStrParse(coordStr)
+				let hColor = worldData[coordStr].material.color.getHex()
+				voxelsArr.push({
+					position: (function() {
+						delete gPos.isGridPos
+						return gPos
+					}()),
+					color: hColor
+				})
+			}
+		}
+
+		return voxelsArr
+	}
+
+	/**
+	 * Add a mesh to the world data
+	 * @memberOf WorldData
+	 * @access public
+	 * @param {VoxelUtils.coordStr} coordStr coordinate string of the voxel
+	 * @param {THREE.Mesh} mesh The mesh to add
+	 */
+	function addMesh(gPos, mesh) {
+		let coordStr = VoxelUtils.getCoordStr(gPos)
+		worldData[coordStr] = mesh
+	}
+
+	/**
+	 * Remove a voxel from worldData
+	 * @memberOf WorldData
+	 * @access public
+	 * @param  {VoxelUtils.GridVector3} gPos Grid position of
+	 * the voxel to remove
+	 */
+	function removeVoxel(gPos) {
+		let coordStr = VoxelUtils.getCoordStr(gPos)
+		delete worldData[coordStr]
+	}
+
+	/**************** getters ******************/
+
+	/**
+	 * Retrieve a voxel with the specified
+	 * grid position
+	 * @access public
+	 * @memberOf WorldData
+	 * @param  {VoxelUtils.GridVector3} gPos Grid position of
+	 * the voxel to get
+	 * @return {object} The mesh or object
+	 */
+	function getVoxel(gPos) {
+		let coordStr = VoxelUtils.getCoordStr(gPos)
+		return worldData[coordStr]
+	}
+
+	/**
+	 * Return the worldData object
+	 * @return {Ojbect} The world data
+	 */
+	function getWorldData() {
+		return worldData
+	}
+
+	/*********** expose public methods *************/
+
+	return {
+		init: init,
+		loadIntoScene: loadIntoScene,
+		getVoxel: getVoxel,
+		addMesh: addMesh,
+		getWorldData: getWorldData,
+		removeVoxel: removeVoxel,
+		getVoxelsArr: getVoxelsArr
+	}
+
+}()
+</pre>
+    </article>
+</section>
+
+
+
+
+
+		</div>
+	</div>
+
+	<div class="clearfix"></div>
+
+	
+
+</div>
+</div>
+
+
+    <div class="modal fade" id="searchResults">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title">Search results</h4>
+          </div>
+          <div class="modal-body"></div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+          </div>
+        </div><!-- /.modal-content -->
+      </div><!-- /.modal-dialog -->
+    </div>
+
+
+<footer>
+
+
+<span class="jsdoc-message">
+	Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a>
+	
+		on Sat May 13th 2017
+	
+	using the <a href="https://github.com/docstrap/docstrap">DocStrap template</a>.
+</span>
+</footer>
+
+<script src="scripts/docstrap.lib.js"></script>
+<script src="scripts/toc.js"></script>
+
+    <script type="text/javascript" src="scripts/fulltext-search-ui.js"></script>
+
+
+<script>
+$( function () {
+	$( "[id*='$']" ).each( function () {
+		var $this = $( this );
+
+		$this.attr( "id", $this.attr( "id" ).replace( "$", "__" ) );
+	} );
+
+	$( ".tutorial-section pre, .readme-section pre, pre.prettyprint.source" ).each( function () {
+		var $this = $( this );
+
+		var example = $this.find( "code" );
+		exampleText = example.html();
+		var lang = /{@lang (.*?)}/.exec( exampleText );
+		if ( lang && lang[1] ) {
+			exampleText = exampleText.replace( lang[0], "" );
+			example.html( exampleText );
+			lang = lang[1];
+		} else {
+			var langClassMatch = example.parent()[0].className.match(/lang\-(\S+)/);
+			lang = langClassMatch ? langClassMatch[1] : "javascript";
+		}
+
+		if ( lang ) {
+
+			$this
+			.addClass( "sunlight-highlight-" + lang )
+			.addClass( "linenums" )
+			.html( example.html() );
+
+		}
+	} );
+
+	Sunlight.highlightAll( {
+		lineNumbers : true,
+		showMenu : true,
+		enableDoclinks : true
+	} );
+
+	$.catchAnchorLinks( {
+        navbarOffset: 10
+	} );
+	$( "#toc" ).toc( {
+		anchorName  : function ( i, heading, prefix ) {
+			return $( heading ).attr( "id" ) || ( prefix + i );
+		},
+		selectors   : "#toc-content h1,#toc-content h2,#toc-content h3,#toc-content h4",
+		showAndHide : false,
+		smoothScrolling: true
+	} );
+
+	$( "#main span[id^='toc']" ).addClass( "toc-shim" );
+	$( '.dropdown-toggle' ).dropdown();
+
+    $( "table" ).each( function () {
+      var $this = $( this );
+      $this.addClass('table');
+    } );
+
+} );
+</script>
+
+
+
+<!--Navigation and Symbol Display-->
+
+
+<!--Google Analytics-->
+
+
+
+    <script type="text/javascript">
+        $(document).ready(function() {
+            SearcherDisplay.init();
+        });
+    </script>
+
+
+</body>
+</html>

@@ -1,8 +1,9 @@
 'use strict'
 
 /**
- * Manages and stores the user's current state
- * @namespace UserState
+ * Manages and stores information on the user
+ * and user state
+ * @namespace User
  */
 let User = function(window, undefined) {
 
@@ -25,7 +26,7 @@ let User = function(window, undefined) {
     /**
      * Initializes the module. Must be called
      * before anything else
-     * @memberOf UserState
+     * @memberOf User
      * @access public
      */
     function init() {
@@ -52,7 +53,7 @@ let User = function(window, undefined) {
     /**
      * Reset the action timer to delay
      * actions again
-     * @memberOf UserState
+     * @memberOf User
      * @access public
      */
     function resetActionTimer() {
@@ -63,7 +64,7 @@ let User = function(window, undefined) {
      * Checks if the user can act
      * based on the actionDelay config
      * setting and the last time acted
-     * @memberOf UserState
+     * @memberOf User
      * @access public
      * @return {boolean}
      */
@@ -76,7 +77,7 @@ let User = function(window, undefined) {
 
     /**
      * Set the user state to default
-     * @memberOf UserState
+     * @memberOf User
      * @access public
      */
     function setDefaultState() {
@@ -86,7 +87,7 @@ let User = function(window, undefined) {
 
     /**
      * Set the user state to PICKCOLOR
-     * @memberOf UserState
+     * @memberOf User
      * @access public
      */
     function setPickState() {

@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width">
+	<title>Voxely Source: classes/MapControls.js</title>
+
+	<!--[if lt IE 9]>
+	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+	<![endif]-->
+	<link type="text/css" rel="stylesheet" href="styles/sunlight.default.css">
+
+	<link type="text/css" rel="stylesheet" href="styles/site.flatly.css">
+
+</head>
+
+<body>
+
+<div class="navbar navbar-default navbar-fixed-top navbar-inverse">
+<div class="container">
+	<div class="navbar-header">
+		<a class="navbar-brand" href="index.html">Voxely</a>
+		<button class="navbar-toggle" type="button" data-toggle="collapse" data-target="#topNavigation">
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+        </button>
+	</div>
+	<div class="navbar-collapse collapse" id="topNavigation">
+		<ul class="nav navbar-nav">
+			
+			<li class="dropdown">
+				<a href="namespaces.list.html" class="dropdown-toggle" data-toggle="dropdown">Namespaces<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="AdminGUI.html">AdminGUI</a></li><li><a href="GameScene.html">GameScene</a></li><li><a href="GUIButtons.html">GUIButtons</a></li><li><a href="GUIControlKit.html">GUIControlKit</a></li><li><a href="Keys.html">Keys</a></li><li><a href="Main.html">Main</a></li><li><a href="MapControls.html">MapControls</a></li><li><a href="Mouse.html">Mouse</a></li><li><a href="Raycast.html">Raycast</a></li><li><a href="SocketHandler.html">SocketHandler</a></li><li><a href="User.html">User</a></li><li><a href="Validation.html">Validation</a></li><li><a href="VoxelActions.html">VoxelActions</a></li><li><a href="VoxelUtils.html">VoxelUtils</a></li><li><a href="WorldData.html">WorldData</a></li>
+				</ul>
+			</li>
+			
+			<li class="dropdown">
+				<a href="classes.list.html" class="dropdown-toggle" data-toggle="dropdown">Classes<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="VoxelUtils.Tuple.html">VoxelUtils.Tuple</a></li>
+				</ul>
+			</li>
+			
+		</ul>
+        
+            <div class="col-sm-3 col-md-3">
+                <form class="navbar-form" role="search">
+                    <div class="input-group">
+                        <input type="text" class="form-control" placeholder="Search" name="q" id="search-input">
+                        <div class="input-group-btn">
+                            <button class="btn btn-default" id="search-submit"><i class="glyphicon glyphicon-search"></i></button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        
+	</div>
+
+</div>
+</div>
+
+
+<div class="container" id="toc-content">
+<div class="row">
+
+	
+	<div class="col-md-12">
+	
+		<div id="main">
+			
+
+		<h1 class="page-title">Source: classes/MapControls.js</h1>
+    
+<section>
+    <article>
+        <pre
+            class="sunlight-highlight-javascript linenums">'use strict'
+
+/**
+ * @author Jacek Jankowski / http://grey-eminence.org/
+ * It is an adaptation of the three.js OrbitControls class to map environments
+ */
+
+// further modified by Davis Yarbrough to work with this project
+
+/**
+ * Handles the zoom, pan, and rotate controls
+ * @namespace MapControls
+ */
+ let MapControls = function() {
+
+     let target
+     let raycastPlane
+     let camera
+     let config
+
+     // constraints
+     let camMinxz
+     let camMaxxz
+     let camMiny
+     let camMaxy
+
+     function init() {
+
+         target = new THREE.Vector3()
+         raycastPlane = GameScene.getMapControlsPlane()
+         camera = GameScene.getCamera()
+         config = Config.getMapControls()
+
+         camMinxz = config.camMinxz
+         camMaxxz = config.camMaxxz
+         camMiny  = config.camMiny
+         camMaxy  = config.camMaxy
+
+         // set target at center
+         let e = $.Event('mousemove')
+         e.clientX = 0
+         e.clientY = 0
+
+ 		 onMouseDown(e)
+
+         // initialize the directional light position
+         GameScene.setDirLightPos(camera.position, target)
+
+     }
+
+    // internals
+    let EPS = 0.000001
+    let rotateStart = new THREE.Vector2()
+    let rotateEnd = new THREE.Vector2()
+    let rotateDelta = new THREE.Vector2()
+    let panStart = new THREE.Vector3()
+    let panDelta = new THREE.Vector3()
+    let phiDelta = 0
+    let thetaDelta = 0
+    let lastPosition = new THREE.Vector3()
+    let STATE = {
+        NONE: -1,
+        ROTATE: 0,
+        DOLLY: 1,
+        PAN: 2
+    }
+    let state = STATE.NONE
+    let vector, projector, intersects,
+        raycaster = new THREE.Raycaster()
+
+    function update() {
+
+        if (lastPosition.distanceTo(camera.position) > 0) {
+
+            GameScene.render()
+            lastPosition.copy(camera.position)
+
+        }
+
+    }
+
+    function getIntersects(xy) {
+        raycaster.setFromCamera(xy, camera)
+        return raycaster.intersectObject(raycastPlane)
+    }
+
+    function onMouseDown(event) {
+
+
+        let intersects
+        if (event.button === 1) {
+
+            state = STATE.PAN
+
+            intersects = getIntersects(Mouse.getMousePos())
+
+            if (intersects.length > 0) {
+
+                panStart = intersects[0].point
+
+            }
+
+        } else if (event.button === 2) {
+
+            state = STATE.ROTATE
+
+            intersects = getIntersects({
+                x: 0,
+                y: 0
+            })
+
+            if (intersects.length > 0) {
+                target = intersects[0].point
+            }
+
+            rotateStart.set(event.clientX, event.clientY)
+
+        }
+
+        document.addEventListener('mousemove', onMouseMove, false)
+        document.addEventListener('mouseup', onMouseUp, false)
+
+    }
+
+    function onMouseMove(event) {
+
+        event.preventDefault()
+
+        if (state === STATE.PAN) {
+
+            let intersects = getIntersects(Mouse.getMousePos())
+
+            if (intersects.length > 0) {
+
+                panDelta = intersects[0].point
+
+                let delta = new THREE.Vector3()
+                delta.subVectors(panStart, panDelta)
+
+                //console.log(camera.position)
+                let pos = camera.position.clone()
+                pos.addVectors(pos, delta)
+
+                if ((pos.x &lt; camMinxz &amp;&amp; pos.x &lt; camera.position.x) ||
+                    (pos.x > camMaxxz &amp;&amp; pos.x > camera.position.x) ||
+                    (pos.z &lt; camMinxz &amp;&amp; pos.z &lt; camera.position.z) ||
+                    (pos.z > camMaxxz &amp;&amp; pos.z > camera.position.z)) return
+
+                camera.position.addVectors(camera.position, delta)
+                GameScene.setDirLightPos(camera.position)
+
+                update()
+
+            }
+
+        } else if (state === STATE.ROTATE) {
+
+            let element = document === document ? document.body : document
+
+            rotateEnd.set(event.clientX, event.clientY)
+            rotateDelta.subVectors(rotateEnd, rotateStart)
+
+            thetaDelta -= 2 * Math.PI * rotateDelta.x / element.clientWidth * config.rotateSpeed
+            phiDelta -= 2 * Math.PI * rotateDelta.y / element.clientHeight * config.rotateSpeed
+
+            let cPosition = camera.position
+            let offset = cPosition.clone().sub(target)
+
+            // angle from z-axis around y-axis
+            let theta = Math.atan2(offset.x, offset.z)
+
+            // angle from y-axis
+            let phi = Math.atan2(Math.sqrt(offset.x * offset.x + offset.z * offset.z), offset.y)
+
+            theta += thetaDelta
+            phi += phiDelta
+
+            // restrict phi to be between desired limits
+            phi = Math.max(config.minPolarAngle, Math.min(config.maxPolarAngle, phi))
+
+            // restrict phi to be betwee EPS and PI-EPS
+            phi = Math.max(EPS, Math.min(Math.PI - EPS, phi))
+
+            let radius = offset.length()
+
+            // restrict radius to be between desired limits
+            radius = Math.max(config.minDistance, Math.min(config.maxDistance, radius))
+
+            offset.x = radius * Math.sin(phi) * Math.sin(theta)
+            offset.y = radius * Math.cos(phi)
+            offset.z = radius * Math.sin(phi) * Math.cos(theta)
+
+            cPosition.copy(target).add(offset)
+            camera.lookAt(target)
+
+            GameScene.setDirLightPos(cPosition, target)
+
+            thetaDelta = 0
+            phiDelta = 0
+
+            rotateStart.copy(rotateEnd)
+
+            update()
+
+        }
+
+    }
+
+    function onMouseUp( /* event */ ) {
+
+        document.removeEventListener('mousemove', onMouseMove, false)
+        document.removeEventListener('mouseup', onMouseUp, false)
+
+        state = STATE.NONE
+
+    }
+
+    function onMouseWheel(event) {
+
+        let delta = 0
+
+        if (event.wheelDelta) { // WebKit / Opera / Explorer 9
+
+            delta = event.wheelDelta
+
+        } else if (event.deltaY) { // Firefox
+
+            delta = -event.deltaY * zoomSpeed * 25
+
+        }
+
+        let zoomOffset = new THREE.Vector3()
+        let te = camera.matrix.elements
+        zoomOffset.set(te[8], te[9], te[10])
+        zoomOffset.multiplyScalar(delta * -config.zoomSpeed * camera.position.y / 1000)
+
+        let pos = camera.position.clone()
+        pos.addVectors(pos, zoomOffset)
+
+        if ((delta &lt; 0 &amp;&amp; pos.y > camMaxy) ||
+            (delta > 0 &amp;&amp; pos.y &lt; camMiny) ||
+            (pos.x &lt; camMinxz &amp;&amp; pos.x &lt; camera.position.x) ||
+            (pos.x > camMaxxz &amp;&amp; pos.x > camera.position.x) ||
+            (pos.z &lt; camMinxz &amp;&amp; pos.z &lt; camera.position.z) ||
+            (pos.z > camMaxxz &amp;&amp; pos.z > camera.position.z)) return
+
+        camera.position.addVectors(camera.position, zoomOffset)
+        GameScene.setDirLightPos(camera.position)
+        update()
+
+    }
+
+    function ctxMenu(e) {
+        e.preventDefault()
+    }
+
+    $(document).on('modalClosed', function() {
+
+        document.addEventListener('contextmenu', ctxMenu)
+        document.addEventListener('mousedown', onMouseDown)
+        document.addEventListener('wheel', onMouseWheel)
+
+    })
+
+    $(document).on('modalOpened', function() {
+
+        document.removeEventListener('contextmenu', ctxMenu)
+        document.removeEventListener('mousedown', onMouseDown)
+        document.removeEventListener('wheel', onMouseWheel)
+
+    })
+
+
+    return {
+        init: init
+    }
+
+}()
+</pre>
+    </article>
+</section>
+
+
+
+
+
+		</div>
+	</div>
+
+	<div class="clearfix"></div>
+
+	
+
+</div>
+</div>
+
+
+    <div class="modal fade" id="searchResults">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title">Search results</h4>
+          </div>
+          <div class="modal-body"></div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+          </div>
+        </div><!-- /.modal-content -->
+      </div><!-- /.modal-dialog -->
+    </div>
+
+
+<footer>
+
+
+<span class="jsdoc-message">
+	Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a>
+	
+		on Sat May 13th 2017
+	
+	using the <a href="https://github.com/docstrap/docstrap">DocStrap template</a>.
+</span>
+</footer>
+
+<script src="scripts/docstrap.lib.js"></script>
+<script src="scripts/toc.js"></script>
+
+    <script type="text/javascript" src="scripts/fulltext-search-ui.js"></script>
+
+
+<script>
+$( function () {
+	$( "[id*='$']" ).each( function () {
+		var $this = $( this );
+
+		$this.attr( "id", $this.attr( "id" ).replace( "$", "__" ) );
+	} );
+
+	$( ".tutorial-section pre, .readme-section pre, pre.prettyprint.source" ).each( function () {
+		var $this = $( this );
+
+		var example = $this.find( "code" );
+		exampleText = example.html();
+		var lang = /{@lang (.*?)}/.exec( exampleText );
+		if ( lang && lang[1] ) {
+			exampleText = exampleText.replace( lang[0], "" );
+			example.html( exampleText );
+			lang = lang[1];
+		} else {
+			var langClassMatch = example.parent()[0].className.match(/lang\-(\S+)/);
+			lang = langClassMatch ? langClassMatch[1] : "javascript";
+		}
+
+		if ( lang ) {
+
+			$this
+			.addClass( "sunlight-highlight-" + lang )
+			.addClass( "linenums" )
+			.html( example.html() );
+
+		}
+	} );
+
+	Sunlight.highlightAll( {
+		lineNumbers : true,
+		showMenu : true,
+		enableDoclinks : true
+	} );
+
+	$.catchAnchorLinks( {
+        navbarOffset: 10
+	} );
+	$( "#toc" ).toc( {
+		anchorName  : function ( i, heading, prefix ) {
+			return $( heading ).attr( "id" ) || ( prefix + i );
+		},
+		selectors   : "#toc-content h1,#toc-content h2,#toc-content h3,#toc-content h4",
+		showAndHide : false,
+		smoothScrolling: true
+	} );
+
+	$( "#main span[id^='toc']" ).addClass( "toc-shim" );
+	$( '.dropdown-toggle' ).dropdown();
+
+    $( "table" ).each( function () {
+      var $this = $( this );
+      $this.addClass('table');
+    } );
+
+} );
+</script>
+
+
+
+<!--Navigation and Symbol Display-->
+
+
+<!--Google Analytics-->
+
+
+
+    <script type="text/javascript">
+        $(document).ready(function() {
+            SearcherDisplay.init();
+        });
+    </script>
+
+
+</body>
+</html>

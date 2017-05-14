@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width">
+	<title>Voxely Source: classes/Mouse.js</title>
+
+	<!--[if lt IE 9]>
+	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+	<![endif]-->
+	<link type="text/css" rel="stylesheet" href="styles/sunlight.default.css">
+
+	<link type="text/css" rel="stylesheet" href="styles/site.flatly.css">
+
+</head>
+
+<body>
+
+<div class="navbar navbar-default navbar-fixed-top navbar-inverse">
+<div class="container">
+	<div class="navbar-header">
+		<a class="navbar-brand" href="index.html">Voxely</a>
+		<button class="navbar-toggle" type="button" data-toggle="collapse" data-target="#topNavigation">
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+        </button>
+	</div>
+	<div class="navbar-collapse collapse" id="topNavigation">
+		<ul class="nav navbar-nav">
+			
+			<li class="dropdown">
+				<a href="namespaces.list.html" class="dropdown-toggle" data-toggle="dropdown">Namespaces<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="AdminGUI.html">AdminGUI</a></li><li><a href="GameScene.html">GameScene</a></li><li><a href="GUIButtons.html">GUIButtons</a></li><li><a href="GUIControlKit.html">GUIControlKit</a></li><li><a href="Keys.html">Keys</a></li><li><a href="Main.html">Main</a></li><li><a href="MapControls.html">MapControls</a></li><li><a href="Mouse.html">Mouse</a></li><li><a href="Raycast.html">Raycast</a></li><li><a href="SocketHandler.html">SocketHandler</a></li><li><a href="User.html">User</a></li><li><a href="Validation.html">Validation</a></li><li><a href="VoxelActions.html">VoxelActions</a></li><li><a href="VoxelUtils.html">VoxelUtils</a></li><li><a href="WorldData.html">WorldData</a></li>
+				</ul>
+			</li>
+			
+			<li class="dropdown">
+				<a href="classes.list.html" class="dropdown-toggle" data-toggle="dropdown">Classes<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="VoxelUtils.Tuple.html">VoxelUtils.Tuple</a></li>
+				</ul>
+			</li>
+			
+		</ul>
+        
+            <div class="col-sm-3 col-md-3">
+                <form class="navbar-form" role="search">
+                    <div class="input-group">
+                        <input type="text" class="form-control" placeholder="Search" name="q" id="search-input">
+                        <div class="input-group-btn">
+                            <button class="btn btn-default" id="search-submit"><i class="glyphicon glyphicon-search"></i></button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        
+	</div>
+
+</div>
+</div>
+
+
+<div class="container" id="toc-content">
+<div class="row">
+
+	
+	<div class="col-md-12">
+	
+		<div id="main">
+			
+
+		<h1 class="page-title">Source: classes/Mouse.js</h1>
+    
+<section>
+    <article>
+        <pre
+            class="sunlight-highlight-javascript linenums">'use strict'
+
+/**
+ * Manages and routes Mouse events
+ * @namespace Mouse
+ */
+let Mouse = function(window, undefined) {
+
+	/*------------------------------------*
+	 :: Class Variables
+	 *------------------------------------*/
+
+	let pos
+
+	/*------------------------------------*
+	 :: Public Methods
+	 *------------------------------------*/
+
+	/**
+	 * Initializes the module. Must be called
+	 * before anything else
+	 * @memberOf Mouse
+	 * @access public
+	 */
+	function init() {
+
+		pos = {}
+
+		$(document).on('modalClosed', addEventListeners)
+		$(document).on('modalOpened', removeEventListeners)
+
+	}
+
+	/**
+	 * Force trigger a mouse move event. This is
+	 * needed when certain changes are made that
+	 * require the specific functionality of the
+	 * mouse move event but cannot be extracted into
+	 * another function
+	 * @memberOf Mouse
+	 * @access public
+	 */
+	function forceTriggerMouseMove() {
+
+		let e = $.Event('mousemove')
+		e.clientX = pos.clientX
+		e.clientY = pos.clientY
+
+		mouseMove(e)
+
+	}
+
+	/**************** getters ******************/
+
+	function getMousePos() {
+		return pos
+	}
+
+	/*------------------------------------*
+	 :: Private Methods
+	 *------------------------------------*/
+
+	/**
+	 * Route a mouse down event
+	 * @memberOf Mouse
+	 * @access private
+	 * @param  {Event} e
+	 */
+	function mouseDown(e) {
+
+		if (GUIControlKit.wasClicked()) {
+			GUIControlKit.setClicked(false)
+			return
+		}
+		if (e.which === 1) leftDown(e)
+	}
+
+	/**
+	 * Handle a left mouse button
+	 * down event
+	 * @memberOf Mouse
+	 * @access private
+	 * @param  {Event} e
+	 */
+	function leftDown(e) {
+
+		e.preventDefault()
+
+		let intersect = getMouseIntersects(e).closestIntx
+
+		if (intersect) { // only act if we intersected something
+
+			let intxGPos = intersect.point.clone().initWorldPos()
+			intxGPos = intxGPos.add(intersect.face.normal).worldToGrid()
+
+			if (VoxelUtils.validBlockLocation(intxGPos)) {
+
+				if (!User.canAct()) return
+				User.resetActionTimer()
+
+				if (User.stateIsPick())
+					GUIControlKit.setPickColor(intersect)
+				else { // create or delete
+
+					if (Keys.isShiftDown()) { // delete voxel
+
+						VoxelActions.deleteVoxelAtIntersect(intersect, function(success) {
+							if (success) forceTriggerMouseMove()
+						})
+					} else { // create voxel
+						VoxelActions.createVoxelAtIntersect(intersect, function(success) {
+							if (success) forceTriggerMouseMove()
+						})
+					}
+
+				}
+
+			}
+
+		}
+
+	}
+
+	/**
+	 * Handle a mouse move event
+	 * @memberOf Mouse
+	 * @access private
+	 * @param  {Event} e
+	 */
+	function mouseMove(e) {
+
+		e.preventDefault()
+
+		if (e.ctrlKey) Keys.setCtrlDown(e.ctrlKey)
+		if (e.shiftKey) Keys.setShiftDown(e.shiftKey)
+
+		pos.clientX = e.clientX
+		pos.clientY = e.clientY
+
+		let intersects = getMouseIntersects(e)
+		let intersect = intersects.closestIntx
+
+		if (intersect) { // only act if we intersected something
+
+			GUIControlKit.setCoords(intersects.planeIntx)
+
+			if (User.stateIsDefault()) {
+				GameScene.updateGhostMesh(intersect)
+				GameScene.updateDeleteMesh(intersect)
+			}
+
+		}
+
+		GameScene.render()
+
+	}
+
+	/**
+	 * This gets the objects that the mouse
+	 * is currently intersecting based on the event\
+	 * @memberOf Mouse
+	 * @access private
+	 * @param  {Event} e
+	 * @return {object}
+	 * @return {{closestIntx: THREE.Intersect, planeIntx: THREE.Intersect}} closestIntx is
+	 * the object the mouse intersected that the is closest to the raycast origin. planeIntx
+	 * is the voxelPlane intersect, if there is one
+	 */
+	function getMouseIntersects(e) {
+
+		let camera = GameScene.getCamera()
+
+		pos.x = (e.clientX / window.innerWidth) * 2 - 1
+		pos.y = -(e.clientY / window.innerHeight) * 2 + 1
+
+		let intersects = Raycast.getIntersects(pos, camera)
+
+		let minDist = Number.MAX_VALUE
+		let closestIntx
+		let planeIntx
+
+		intersects.forEach(function(intx) {
+			if (intx.distance &lt; minDist) {
+				closestIntx = intx
+				minDist = intx.distance
+			}
+			if (intx.object.name === 'plane')
+				planeIntx = intx
+		})
+
+		return {
+			closestIntx: closestIntx,
+			planeIntx: planeIntx
+		}
+
+	}
+
+	/**
+	 * Add mouse event listeners to the document
+	 * @memberOf Mouse
+	 * @access private
+	 */
+	function addEventListeners() {
+
+		// we are using a jQuery bind here so we can force
+		// trigger a mouseMove event from mouseDown
+		$(document).mousemove(mouseMove)
+		document.addEventListener('mousedown', mouseDown)
+	}
+
+	/**
+	 * Remove mouse event listeners to the document
+	 * @memberOf Mouse
+	 * @access private
+	 */
+	function removeEventListeners() {
+		$(document).unbind('mousemove')
+		document.removeEventListener('mousedown', mouseDown)
+	}
+
+	/*********** expose public methods *************/
+
+	return {
+		init: init,
+		forceTriggerMouseMove: forceTriggerMouseMove,
+		getMouseIntersects: getMouseIntersects,
+		getMousePos: getMousePos
+	}
+
+}(window)
+</pre>
+    </article>
+</section>
+
+
+
+
+
+		</div>
+	</div>
+
+	<div class="clearfix"></div>
+
+	
+
+</div>
+</div>
+
+
+    <div class="modal fade" id="searchResults">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title">Search results</h4>
+          </div>
+          <div class="modal-body"></div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+          </div>
+        </div><!-- /.modal-content -->
+      </div><!-- /.modal-dialog -->
+    </div>
+
+
+<footer>
+
+
+<span class="jsdoc-message">
+	Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a>
+	
+		on Sat May 13th 2017
+	
+	using the <a href="https://github.com/docstrap/docstrap">DocStrap template</a>.
+</span>
+</footer>
+
+<script src="scripts/docstrap.lib.js"></script>
+<script src="scripts/toc.js"></script>
+
+    <script type="text/javascript" src="scripts/fulltext-search-ui.js"></script>
+
+
+<script>
+$( function () {
+	$( "[id*='$']" ).each( function () {
+		var $this = $( this );
+
+		$this.attr( "id", $this.attr( "id" ).replace( "$", "__" ) );
+	} );
+
+	$( ".tutorial-section pre, .readme-section pre, pre.prettyprint.source" ).each( function () {
+		var $this = $( this );
+
+		var example = $this.find( "code" );
+		exampleText = example.html();
+		var lang = /{@lang (.*?)}/.exec( exampleText );
+		if ( lang && lang[1] ) {
+			exampleText = exampleText.replace( lang[0], "" );
+			example.html( exampleText );
+			lang = lang[1];
+		} else {
+			var langClassMatch = example.parent()[0].className.match(/lang\-(\S+)/);
+			lang = langClassMatch ? langClassMatch[1] : "javascript";
+		}
+
+		if ( lang ) {
+
+			$this
+			.addClass( "sunlight-highlight-" + lang )
+			.addClass( "linenums" )
+			.html( example.html() );
+
+		}
+	} );
+
+	Sunlight.highlightAll( {
+		lineNumbers : true,
+		showMenu : true,
+		enableDoclinks : true
+	} );
+
+	$.catchAnchorLinks( {
+        navbarOffset: 10
+	} );
+	$( "#toc" ).toc( {
+		anchorName  : function ( i, heading, prefix ) {
+			return $( heading ).attr( "id" ) || ( prefix + i );
+		},
+		selectors   : "#toc-content h1,#toc-content h2,#toc-content h3,#toc-content h4",
+		showAndHide : false,
+		smoothScrolling: true
+	} );
+
+	$( "#main span[id^='toc']" ).addClass( "toc-shim" );
+	$( '.dropdown-toggle' ).dropdown();
+
+    $( "table" ).each( function () {
+      var $this = $( this );
+      $this.addClass('table');
+    } );
+
+} );
+</script>
+
+
+
+<!--Navigation and Symbol Display-->
+
+
+<!--Google Analytics-->
+
+
+
+    <script type="text/javascript">
+        $(document).ready(function() {
+            SearcherDisplay.init();
+        });
+    </script>
+
+
+</body>
+</html>

@@ -171,9 +171,8 @@ let SocketHandler = function(window, undefined) {
 
 			let gPos = new THREE.Vector3(pos.x, pos.y, pos.z).initGridPos()
 			let tColor = new THREE.Color(block.color)
-			let username = block.username
 
-			VoxelActions.createVoxelAtGridPos(gPos, '#' + tColor.getHexString(), username)
+			VoxelActions.createVoxelAtGridPos(gPos, '#' + tColor.getHexString())
 
 			GameScene.render()
 
