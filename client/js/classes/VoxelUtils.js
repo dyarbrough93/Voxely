@@ -391,7 +391,6 @@ let VoxelUtils = (function(window, undefined) {
         initVoxel: initVoxel,
         countObjAttrs: countObjAttrs,
         Tuple: Tuple,
-        buildOutlineGeom: buildOutlineGeom,
         hexStringToDec: hexStringToDec,
         getGridPositionFromIntersect: getGridPositionFromIntersect
 

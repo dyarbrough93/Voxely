@@ -319,7 +319,6 @@ let GUIControlKit = function(window, undefined) {
 
 	return {
 		init: init,
-		destroy: destroy,
 		getBlockColor: getBlockColor,
 		wasClicked: wasClicked,
 		setClicked: setClicked,
