@@ -10,6 +10,6 @@ let dataSchema = new Schema({
         z: Number
     },
     color: Number
-}, {collection: dev + 'V2voxels'})
+}, {collection: dev + 'VoxelyVoxels'})
 
 module.exports = mongoose.model('Voxel', dataSchema)
